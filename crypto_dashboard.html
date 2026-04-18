@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Returns Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0c0f;
+    --bg2:       #111418;
+    --bg3:       #181c22;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.13);
+    --text:      #e8eaf0;
+    --muted:     #6b7280;
+    --muted2:    #4b5563;
+    --green:     #22c55e;
+    --green-dim: #16a34a;
+    --red:       #ef4444;
+    --red-dim:   #b91c1c;
+    --blue:      #3b82f6;
+    --blue-dim:  #1d4ed8;
+    --accent:    #f59e0b;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(10,12,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 13px;
+    color: #000;
+    letter-spacing: -0.5px;
+  }
+  .header-title {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .header-title span { color: var(--muted); font-weight: 400; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .source-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot-blue  { background: var(--blue);  box-shadow: 0 0 6px var(--blue); }
+
+  /* ── MAIN ── */
+  main { max-width: 1200px; margin: 0 auto; padding: 32px 32px 64px; }
+
+  /* ── KPI ROW ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .kpi {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .kpi:hover { border-color: var(--border2); }
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .kpi:hover::before { opacity: 1; }
+  .kpi-label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    font-family: var(--font-mono);
+  }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  .neu { color: var(--text); }
+
+  /* ── TABS ── */
+  .tabs-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    padding: 5px 13px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    background: transparent;
+    color: var(--muted);
+    transition: all .15s;
+  }
+  .tab:hover { border-color: var(--border2); color: var(--text); }
+  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tab.gs { border-color: #1d4ed855; color: var(--blue); }
+  .tab.gs:hover { border-color: var(--blue); }
+  .tab.gs.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .gs-mark { font-size: 9px; }
+
+  /* ── CONFLICT BANNER ── */
+  .conflict-bar {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    display: none;
+  }
+  .conflict-bar.show { display: flex; }
+  .conflict-tag {
+    background: rgba(239,68,68,0.2);
+    color: #fca5a5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  /* ── CHARTS LAYOUT ── */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .chart-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+  }
+
+  /* ── PROTOCOL TABLE ── */
+  .proto-list { display: flex; flex-direction: column; gap: 8px; }
+  .proto-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    transition: background .15s;
+  }
+  .proto-row:hover { background: var(--bg3); }
+  .proto-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .proto-name { flex: 1; font-size: 12px; font-family: var(--font-mono); color: var(--text); }
+  .proto-val { font-size: 12px; font-family: var(--font-mono); font-weight: 500; }
+  .proto-pct { font-size: 10px; color: var(--muted); min-width: 32px; text-align: right; font-family: var(--font-mono); }
+
+  /* ── LEGEND ── */
+  .legend-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+  }
+  .legend-sq { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--muted2);
+  }
+  .footer-sources { display: flex; gap: 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-mark">CR</div>
+    <div class="header-title">Crypto Returns <span>/ Dashboard</span></div>
+  </div>
+  <div class="header-right">
+    <div class="source-pill"><span class="dot dot-green"></span> Excel</div>
+    <div class="source-pill"><span class="dot dot-blue"></span> Google Sheets</div>
+  </div>
+</header>
+
+<main>
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="tabs-wrap" id="tabsWrap"></div>
+
+  <div class="conflict-bar" id="conflictBar">
+    <span class="conflict-tag">⚠ Conflict</span>
+    <span id="conflictText"></span>
+  </div>
+
+  <div class="legend-wrap" id="legendWrap"></div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title" id="barTitle">Monthly returns</span>
+      </div>
+      <div style="position:relative;height:300px">
+        <canvas id="barChart" role="img" aria-label="Monthly crypto returns"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Protocol breakdown</span>
+      </div>
+      <div style="position:relative;height:180px;margin-bottom:16px">
+        <canvas id="pieChart" role="img" aria-label="Return share by protocol"></canvas>
+      </div>
+      <div class="proto-list" id="protoList"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>Crypto Returns Dashboard</span>
+  <div class="footer-sources">
+    <span><span style="color:var(--green)">▪</span> Excel = source of record</span>
+    <span><span style="color:var(--blue)">◆</span> Google Sheets = overrides Excel</span>
+  </div>
+</footer>
+
+<script>
+const RAW = {
+  "JUN 24": {total:307,   source:"xl", rows:[{p:"Binance",v:190},{p:"SyncSwap",v:31},{p:"Mode",v:55},{p:"Kamino",v:31}]},
+  "JUL 24": {total:902,   source:"xl", rows:[{p:"Binance",v:162},{p:"SyncSwap",v:33},{p:"Mode",v:56},{p:"Kamino",v:204},{p:"Sanctum",v:215},{p:"BlockCentral",v:62},{p:"Ref Finance",v:170}]},
+  "AUG 24": {total:838,   source:"xl", rows:[{p:"Binance",v:117},{p:"SyncSwap",v:506},{p:"Kamino",v:7},{p:"BlockCentral",v:48},{p:"TRX Bot",v:27},{p:"Ref Finance",v:133}]},
+  "SEP 24": {total:1328,  source:"xl", rows:[{p:"Ref Finance",v:249},{p:"Binance",v:120},{p:"SyncSwap",v:54},{p:"Kamino",v:708},{p:"BlockCentral",v:97},{p:"TRX Bot",v:100}]},
+  "NOV 24": {total:1355,  source:"xl", rows:[{p:"Ref Finance",v:106},{p:"Binance",v:162},{p:"SyncSwap",v:140},{p:"Kamino",v:300},{p:"BlockCentral",v:80},{p:"TRX Bot",v:157},{p:"Sanctum",v:410}]},
+  "DEC 24": {total:1006,  source:"xl", rows:[{p:"Ref Finance",v:180},{p:"Fuel",v:141},{p:"Binance",v:54},{p:"SyncSwap",v:15},{p:"Kamino",v:362},{p:"BlockCentral",v:55},{p:"TRX Bot",v:200}]},
+  "JAN 25": {total:-1133, source:"gs", xlTotal:977, conflict:true,  rows:[{p:"TRX Bot",v:63},{p:"Kamino",v:-1309},{p:"DOT Staking",v:8},{p:"AERO Staking",v:70},{p:"GMX Staking",v:24},{p:"PYTH",v:10}]},
+  "FEB 25": {total:120,   source:"xl", rows:[{p:"TRX Bot",v:172},{p:"Kamino",v:383},{p:"Kamino",v:-566},{p:"Aerodrome",v:-500},{p:"Cetus",v:64},{p:"Meridian",v:361}]},
+  "MAR 25": {total:546,   source:"xl", rows:[{p:"TRX Bot",v:193},{p:"Kamino",v:230},{p:"Cetus",v:19},{p:"Fuel",v:11},{p:"Meridian",v:62},{p:"DOT Staking",v:31}]},
+  "APR 25": {total:745,   source:"xl", rows:[{p:"TRX Bot",v:206},{p:"Kamino",v:530},{p:"Cetus",v:114},{p:"Meridian",v:-155},{p:"DOT Staking",v:21},{p:"NEAR Staking",v:29}]},
+  "MAY 25": {total:771,   source:"xl", rows:[{p:"TRX Bot",v:264},{p:"Kamino",v:375},{p:"DOT Staking",v:28},{p:"NEAR Staking",v:20},{p:"Kamino Airdrop",v:83}]},
+  "JUN 25": {total:-60,   source:"xl", rows:[{p:"TRX Bot",v:217},{p:"Kamino",v:-54},{p:"Cetus",v:-300},{p:"DOT Staking",v:22},{p:"NEAR Staking",v:18},{p:"USDC Autopilot",v:37}]},
+  "AUG 25": {total:806,   source:"xl", rows:[{p:"TRX Bot",v:148},{p:"Kamino",v:504},{p:"Aerodrome",v:39},{p:"Cetus",v:13},{p:"DOT Staking",v:23},{p:"NEAR Staking",v:16},{p:"MGX Staking",v:21},{p:"USDC Autopilot",v:42}]},
+  "SEP 25": {total:806,   source:"xl", rows:[{p:"TRX Bot",v:148},{p:"Kamino",v:504},{p:"Aerodrome",v:39},{p:"Cetus",v:13},{p:"DOT Staking",v:23},{p:"NEAR Staking",v:16},{p:"MGX Staking",v:21},{p:"USDC Autopilot",v:42}]},
+  "OCT 25": {total:593,   source:"xl", rows:[{p:"TRX Bot",v:44},{p:"Kamino",v:365},{p:"Cetus",v:-10},{p:"DOT Staking",v:39},{p:"NEAR Staking",v:13},{p:"AERO Staking",v:41},{p:"MGX Staking",v:59},{p:"SideShift",v:2},{p:"USDC Autopilot",v:40}]},
+  "NOV 25": {total:-941,  source:"gs", xlTotal:371, conflict:true,  rows:[{p:"TRX Bot",v:47},{p:"Kamino",v:-1194},{p:"Cetus",v:9},{p:"DOT Staking",v:13},{p:"AERO Staking",v:131},{p:"GMX Staking",v:48},{p:"PYTH",v:4}]},
+  "DEC 25": {total:47,    source:"gs", conflict:false, rows:[{p:"TRX Bot",v:89},{p:"Kamino",v:-174},{p:"DOT Staking",v:14},{p:"AERO Staking",v:80},{p:"GMX Staking",v:39},{p:"PYTH",v:0}]}
+};
+
+const COLORS = {
+  "Kamino":"#3b82f6","TRX Bot":"#22c55e","Binance":"#f59e0b","Ref Finance":"#ef4444",
+  "SyncSwap":"#8b5cf6","Sanctum":"#d97706","BlockCentral":"#ec4899","Aerodrome":"#84cc16",
+  "Cetus":"#06b6d4","Meridian":"#f87171","DOT Staking":"#4ade80","NEAR Staking":"#fde68a",
+  "Fuel":"#c084fc","Mode":"#60a5fa","USDC Autopilot":"#2dd4bf","MGX Staking":"#fb923c",
+  "Kamino Airdrop":"#93c5fd","AERO Staking":"#475569","GMX Staking":"#67e8f9",
+  "PYTH":"#a3e635","SideShift":"#94a3b8","Kamino Multiply":"#1d4ed8"
+};
+const gc = p => COLORS[p] || "#6b7280";
+
+const MONTHS = Object.keys(RAW);
+let active = "ALL";
+let barChart = null, pieChart = null;
+
+function agg(rows) {
+  const m = {};
+  rows.forEach(r => { if (!m[r.p]) m[r.p] = 0; m[r.p] += r.v; });
+  return m;
+}
+
+function fmt(v) {
+  const abs = Math.abs(Math.round(v));
+  return (v < 0 ? '-' : '') + '$' + abs.toLocaleString();
+}
+
+function renderKPI(month) {
+  const el = document.getElementById('kpiGrid');
+  if (month === 'ALL') {
+    let sum = 0, bestV = -Infinity, worstV = Infinity, bestM = '', worstM = '';
+    MONTHS.forEach(m => {
+      const v = RAW[m].total; sum += v;
+      if (v > bestV) { bestV = v; bestM = m; }
+      if (v < worstV) { worstV = v; worstM = m; }
+    });
+    const avg = Math.round(sum / MONTHS.length);
+    const gsMths = MONTHS.filter(m => RAW[m].source === 'gs').length;
+    el.innerHTML = `
+      <div class="kpi"><div class="kpi-label">Total return</div><div class="kpi-value ${sum>=0?'pos':'neg'}">${fmt(sum)}</div><div class="kpi-sub">all time</div></div>
+      <div class="kpi"><div class="kpi-label">Monthly avg</div><div class="kpi-value neu">${fmt(avg)}</div><div class="kpi-sub">per month</div></div>
+      <div class="kpi"><div class="kpi-label">Best month</div><div class="kpi-value pos">${fmt(bestV)}</div><div class="kpi-sub">${bestM}</div></div>
+      <div class="kpi"><div class="kpi-label">Worst month</div><div class="kpi-value neg">${fmt(worstV)}</div><div class="kpi-sub">${worstM}</div></div>
+      <div class="kpi"><div class="kpi-label">Tracked</div><div class="kpi-value neu">${MONTHS.length}</div><div class="kpi-sub">${gsMths} from Sheets</div></div>
+    `;
+  } else {
+    const d = RAW[month];
+    const aggd = agg(d.rows);
+    const ents = Object.entries(aggd);
+    const best = ents.length ? ents.reduce((a,b) => b[1]>a[1]?b:a) : ['—', 0];
+    const worst = ents.length ? ents.reduce((a,b) => b[1]<a[1]?b:a) : ['—', 0];
+    const srcLabel = d.source === 'gs' ? '<span style="color:var(--blue)">◆ Sheets</span>' : '<span style="color:var(--green)">▪ Excel</span>';
+    el.innerHTML = `
+      <div class="kpi"><div class="kpi-label">Return ${srcLabel}</div><div class="kpi-value ${d.total>=0?'pos':'neg'}">${fmt(d.total)}</div><div class="kpi-sub">${month}</div></div>
+      <div class="kpi"><div class="kpi-label">Best protocol</div><div class="kpi-value pos" style="font-size:16px">${fmt(best[1])}</div><div class="kpi-sub">${best[0]}</div></div>
+      <div class="kpi"><div class="kpi-label">Worst protocol</div><div class="kpi-value neg" style="font-size:16px">${fmt(worst[1])}</div><div class="kpi-sub">${worst[0]}</div></div>
+      <div class="kpi"><div class="kpi-label">Protocols</div><div class="kpi-value neu">${ents.length}</div><div class="kpi-sub">active</div></div>
+    `;
+  }
+}
+
+function renderConflict(month) {
+  const bar = document.getElementById('conflictBar');
+  const txt = document.getElementById('conflictText');
+  if (month === 'ALL' || !RAW[month] || !RAW[month].conflict) { bar.classList.remove('show'); return; }
+  const d = RAW[month];
+  bar.classList.add('show');
+  txt.innerHTML = `Google Sheets: <span class="${d.total>=0?'pos':'neg'}" style="font-weight:600">${fmt(d.total)}</span>
+    &nbsp;·&nbsp; Excel was: <span style="color:var(--muted)">${fmt(d.xlTotal)}</span>
+    &nbsp;·&nbsp; Δ <span class="neg">${fmt(d.total - d.xlTotal)}</span>
+    &nbsp;·&nbsp; Google Sheets data is used.`;
+}
+
+function renderBar(month) {
+  if (barChart) barChart.destroy();
+  document.getElementById('barTitle').textContent = month === 'ALL' ? 'Monthly returns' : `${month} — by protocol`;
+  let labels, data, colors;
+  if (month === 'ALL') {
+    labels = MONTHS;
+    data = MONTHS.map(m => RAW[m].total);
+    colors = MONTHS.map(m => {
+      const d = RAW[m];
+      if (d.source === 'gs') return d.total >= 0 ? '#3b82f6' : '#93c5fd';
+      return d.total >= 0 ? '#22c55e' : '#ef4444';
+    });
+  } else {
+    const aggd = agg(RAW[month].rows);
+    const sorted = Object.entries(aggd).sort((a,b) => b[1]-a[1]);
+    labels = sorted.map(e => e[0]);
+    data = sorted.map(e => Math.round(e[1]));
+    colors = sorted.map(e => gc(e[0]));
+  }
+  barChart = new Chart(document.getElementById('barChart').getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 4, borderSkipped: false }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1f26',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleFont: { family: "'IBM Plex Mono'" },
+          bodyFont: { family: "'IBM Plex Mono'" },
+          callbacks: { label: c => ' ' + fmt(c.raw) }
+        }
+      },
+      scales: {
+        y: {
+          ticks: { color: '#6b7280', font: { family: "'IBM Plex Mono'", size: 10 }, callback: v => '$'+v.toLocaleString() },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.07)' }
+        },
+        x: {
+          ticks: { color: '#6b7280', font: { family: "'IBM Plex Mono'", size: 10 }, maxRotation: 40, autoSkip: false },
+          grid: { display: false },
+          border: { color: 'rgba(255,255,255,0.07)' }
+        }
+      }
+    }
+  });
+}
+
+function renderPie(month) {
+  if (pieChart) pieChart.destroy();
+  let aggd = {};
+  if (month === 'ALL') {
+    MONTHS.forEach(m => RAW[m].rows.forEach(r => { if (!aggd[r.p]) aggd[r.p]=0; aggd[r.p]+=r.v; }));
+  } else { aggd = agg(RAW[month].rows); }
+
+  const sorted = Object.entries(aggd).filter(e => e[1] > 0).sort((a,b) => b[1]-a[1]);
+  const total = sorted.reduce((s,e) => s+e[1], 0);
+
+  pieChart = new Chart(document.getElementById('pieChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: sorted.map(e => e[0]),
+      datasets: [{ data: sorted.map(e => Math.round(e[1])), backgroundColor: sorted.map(e => gc(e[0])), borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1f26',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleFont: { family: "'IBM Plex Mono'" },
+          bodyFont: { family: "'IBM Plex Mono'" },
+          callbacks: { label: c => ` ${fmt(c.raw)} (${((c.raw/total)*100).toFixed(1)}%)` }
+        }
+      }
+    }
+  });
+
+  // proto list
+  document.getElementById('protoList').innerHTML = sorted.slice(0, 8).map(([p, v]) => `
+    <div class="proto-row">
+      <span class="proto-dot" style="background:${gc(p)}"></span>
+      <span class="proto-name">${p}</span>
+      <span class="proto-val ${v>=0?'pos':'neg'}">${fmt(v)}</span>
+      <span class="proto-pct">${total>0?((v/total)*100).toFixed(0):0}%</span>
+    </div>
+  `).join('');
+}
+
+function renderLegend(month) {
+  let aggd = {};
+  if (month === 'ALL') {
+    MONTHS.forEach(m => RAW[m].rows.forEach(r => { if (!aggd[r.p]) aggd[r.p]=0; aggd[r.p]+=r.v; }));
+  } else { aggd = agg(RAW[month].rows); }
+  const top = Object.entries(aggd).sort((a,b) => b[1]-a[1]).slice(0, 9).map(e => e[0]);
+  document.getElementById('legendWrap').innerHTML = top.map(p => `
+    <span class="legend-item"><span class="legend-sq" style="background:${gc(p)}"></span>${p}</span>
+  `).join('');
+}
+
+function renderAll(month) {
+  renderKPI(month);
+  renderConflict(month);
+  renderBar(month);
+  renderPie(month);
+  renderLegend(month);
+}
+
+function buildTabs() {
+  const wrap = document.getElementById('tabsWrap');
+  const all = ['ALL', ...MONTHS];
+  wrap.innerHTML = all.map(m => {
+    const isGs = m !== 'ALL' && RAW[m] && RAW[m].source === 'gs';
+    return `<button class="tab${isGs?' gs':''}${m===active?' active':''}" data-m="${m}">${m==='ALL'?'All months':m}${isGs?' ◆':''}</button>`;
+  }).join('');
+  wrap.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      active = btn.dataset.m;
+      wrap.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderAll(active);
+    });
+  });
+}
+
+buildTabs();
+renderAll('ALL');
+</script>
+</body>
+</html>
