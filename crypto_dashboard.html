@@ -237,6 +237,47 @@ footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; al
 </div>
 
 
+
+<!-- ADD / EDIT MODAL (for editing 2024/2025 months) -->
+<div class="overlay" id="addOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Edit month</span>
+      <button class="modal-close" onclick="closeAddModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Month name</label>
+          <input class="form-input" id="inputMonth" placeholder="e.g. JUN 24" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Source</label>
+          <select class="form-select" id="inputSource">
+            <option value="xl">Excel</option>
+            <option value="gs">Google Sheets</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" id="conflictGroup" style="display:none">
+        <label class="form-label">Excel total ($)</label>
+        <input class="form-input" id="inputXlTotal" type="number" placeholder="e.g. 977" />
+      </div>
+      <div class="proto-section-title">Protocols</div>
+      <div class="proto-entries" id="protoEntries"></div>
+      <button class="add-proto-btn" onclick="addProtoRow()">+ Add protocol</button>
+      <div class="total-preview">
+        <span class="total-label">Calculated monthly total</span>
+        <span class="total-num neu" id="totalPreview">$0</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="saveMonth()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── SMART ENTRY MODAL ── -->
 <div class="overlay" id="entryOverlay">
   <div class="modal" style="max-width:720px">
@@ -333,9 +374,9 @@ const gc=p=>{if(!COLORS[p]){COLORS[p]=COLOR_POOL[colorIdx%COLOR_POOL.length];col
 
 let RAW={}, active="ALL", activeYear="ALL", barChart=null, pieChart=null, editingMonth=null;
 
-function loadData(){try{const s=localStorage.getItem('crypto_dash_v4');if(s){RAW=JSON.parse(s);updateLastSaved();return;}}catch(e){}RAW=JSON.parse(JSON.stringify(DEFAULT_DATA));}
-function saveData(){localStorage.setItem('crypto_dash_v4',JSON.stringify(RAW));document.getElementById('lastSaved').textContent='Saved '+new Date().toLocaleTimeString();}
-function updateLastSaved(){if(localStorage.getItem('crypto_dash_v4'))document.getElementById('lastSaved').textContent='Loaded from storage';}
+function loadData(){try{const s=localStorage.getItem('crypto_dash_v3');if(s){RAW=JSON.parse(s);updateLastSaved();return;}}catch(e){}RAW=JSON.parse(JSON.stringify(DEFAULT_DATA));}
+function saveData(){localStorage.setItem('crypto_dash_v3',JSON.stringify(RAW));document.getElementById('lastSaved').textContent='Saved '+new Date().toLocaleTimeString();}
+function updateLastSaved(){if(localStorage.getItem('crypto_dash_v3'))document.getElementById('lastSaved').textContent='Loaded from storage';}
 
 const fmt=v=>(v<0?'-':'')+'$'+Math.abs(Math.round(v)).toLocaleString();
 const fmtPct=v=>(v>=0?'+':'')+v.toFixed(1)+'%';
@@ -529,7 +570,7 @@ function openManageModal(){
       <span class="month-manage-name">${m}</span>
       <span class="month-manage-total ${d.total>=0?'pos':'neg'}">${fmt(d.total)}</span>
       <span class="src-badge ${d.source==='gs'?'src-gs':'src-xl'}">${d.source==='gs'?'◆ Sheets':'▪ Excel'}</span>
-      <button class="btn" style="padding:4px 10px;font-size:11px" onclick="closeManageModal();openEntryModal('${m}')">Edit</button>
+      <button class="btn" style="padding:4px 10px;font-size:11px" onclick="closeManageModal();handleEditMonth('${m}')">Edit</button>
       <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteMonth('${m}')">Delete</button>
     </div>`;
   }).join('');
@@ -697,6 +738,88 @@ function updateEntryTotals(){
   aprEl.className = 'month-total-val ' + (portfolioAPR !== null ? (portfolioAPR >= 0 ? 'pos' : 'neg') : 'neu');
 }
 
+
+// ── CLASSIC EDIT MODAL (2024 / 2025 months) ──
+let editingMonth = null;
+function openAddModal(editMonth=null){
+  editingMonth = editMonth;
+  document.getElementById('modalTitle').textContent = editMonth ? `Edit — ${editMonth}` : 'Edit month';
+  document.getElementById('inputMonth').value = editMonth || '';
+  document.getElementById('inputMonth').disabled = !!editMonth;
+  document.getElementById('inputSource').value = editMonth ? RAW[editMonth].source : 'xl';
+  document.getElementById('inputXlTotal').value = editMonth && RAW[editMonth].xlTotal ? RAW[editMonth].xlTotal : '';
+  const entries = document.getElementById('protoEntries');
+  entries.innerHTML = '';
+  const initRows = editMonth ? RAW[editMonth].rows : [{p:'',v:0,qty:'',token:'',investUsd:''}];
+  const merged = {};
+  initRows.forEach(r => {
+    if(!merged[r.p]) merged[r.p] = {v:0, qty:r.qty, token:r.token, investUsd:r.investUsd||0};
+    merged[r.p].v += r.v;
+    if(r.investUsd) merged[r.p].investUsd += r.investUsd;
+  });
+  Object.entries(merged).forEach(([p,d]) => addProtoRow(p, d.v, d.qty, d.token, d.investUsd));
+  toggleConflictGroup(); updateTotalPreview();
+  document.getElementById('addOverlay').classList.add('open');
+}
+function closeAddModal(){ document.getElementById('addOverlay').classList.remove('open'); editingMonth = null; }
+function toggleConflictGroup(){
+  document.getElementById('conflictGroup').style.display = document.getElementById('inputSource').value === 'gs' ? 'block' : 'none';
+}
+document.getElementById('inputSource').addEventListener('change', toggleConflictGroup);
+
+function addProtoRow(name='', returnVal=0, qty='', token='', investUsd=''){
+  const list = document.getElementById('protoEntries');
+  const div = document.createElement('div'); div.className = 'proto-entry-card';
+  div.innerHTML = `
+    <button class="remove-entry-btn" onclick="this.parentElement.remove();updateTotalPreview()">×</button>
+    <div class="proto-entry-grid" style="margin-bottom:8px">
+      <div><div class="proto-entry-label">Protocol name</div><input class="form-input proto-name-in" placeholder="e.g. Kamino" value="${name}"/></div>
+      <div><div class="proto-entry-label">Monthly return ($)</div><input class="form-input proto-ret-in" type="number" step="0.01" placeholder="e.g. 350" value="${returnVal}"/></div>
+    </div>
+    <div class="proto-entry-grid-3">
+      <div><div class="proto-entry-label">Token amount</div><input class="form-input proto-qty-in" placeholder="e.g. 1732" value="${qty||''}"/></div>
+      <div><div class="proto-entry-label">Token symbol</div><input class="form-input proto-tok-in" placeholder="e.g. JLP" value="${token||''}"/></div>
+      <div><div class="proto-entry-label">Invested ($)</div><input class="form-input proto-inv-in" type="number" step="1" placeholder="e.g. 9387" value="${investUsd||''}"/></div>
+    </div>`;
+  div.querySelector('.proto-ret-in').addEventListener('input', updateTotalPreview);
+  list.appendChild(div);
+}
+function updateTotalPreview(){
+  let total = 0; document.querySelectorAll('.proto-ret-in').forEach(i => { total += parseFloat(i.value)||0; });
+  const el = document.getElementById('totalPreview'); el.textContent = fmt(total); el.className = 'total-num ' + (total>=0?'pos':'neg');
+}
+function saveMonth(){
+  const monthName = (document.getElementById('inputMonth').value||'').trim().toUpperCase();
+  const source    = document.getElementById('inputSource').value;
+  const xlTotal   = parseFloat(document.getElementById('inputXlTotal').value)||null;
+  if(!monthName){ showToast('Please enter a month name','error'); return; }
+  const rows = []; let total = 0;
+  document.querySelectorAll('.proto-entry-card').forEach(card => {
+    const p        = card.querySelector('.proto-name-in').value.trim();
+    const v        = parseFloat(card.querySelector('.proto-ret-in').value)||0;
+    const qty      = card.querySelector('.proto-qty-in').value.trim();
+    const token    = card.querySelector('.proto-tok-in').value.trim();
+    const investUsd = parseFloat(card.querySelector('.proto-inv-in').value)||0;
+    if(p){ rows.push({p, v, qty:qty||null, token:token||null, investUsd}); total += v; }
+  });
+  if(rows.length===0){ showToast('Add at least one protocol','error'); return; }
+  const conflict = source==='gs' && xlTotal!==null && !isNaN(xlTotal);
+  RAW[monthName] = {total:Math.round(total*100)/100, source, rows, ...(conflict?{xlTotal,conflict:true}:{})};
+  activeYear = getYear(monthName); active = monthName;
+  saveData(); buildNav(); renderAll(active);
+  closeAddModal(); showToast(`${monthName} ${editingMonth?'updated':'saved'} ✓`,'success');
+}
+document.getElementById('addOverlay').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeAddModal(); });
+
+// Route edit: smart entry for 2026+, classic modal for older months
+function handleEditMonth(month){
+  const yr = getYear(month); // "24", "25", "26"...
+  if(parseInt(yr) >= 26){
+    openEntryModal(month);
+  } else {
+    openAddModal(month);
+  }
+}
 function saveEntryMonth(){
   const monthName  = (document.getElementById('entryMonth').value || '').trim().toUpperCase();
   const isEdit     = !!document.getElementById('entryMonth').disabled;
