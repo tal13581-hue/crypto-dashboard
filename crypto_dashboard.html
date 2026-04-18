@@ -7,270 +7,134 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0a0c0f; --bg2:#111418; --bg3:#181c22; --bg4:#1e232b;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13); --border3:rgba(255,255,255,0.2);
+  --text:#e8eaf0; --muted:#6b7280; --muted2:#4b5563;
+  --green:#22c55e; --red:#ef4444; --blue:#3b82f6; --accent:#f59e0b;
+  --font-mono:'IBM Plex Mono',monospace; --font-sans:'IBM Plex Sans',sans-serif;
+}
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--text); font-family:var(--font-sans); font-size:14px; line-height:1.5; min-height:100vh; }
 
-  :root {
-    --bg:        #0a0c0f;
-    --bg2:       #111418;
-    --bg3:       #181c22;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.13);
-    --text:      #e8eaf0;
-    --muted:     #6b7280;
-    --muted2:    #4b5563;
-    --green:     #22c55e;
-    --green-dim: #16a34a;
-    --red:       #ef4444;
-    --red-dim:   #b91c1c;
-    --blue:      #3b82f6;
-    --blue-dim:  #1d4ed8;
-    --accent:    #f59e0b;
-    --font-mono: 'IBM Plex Mono', monospace;
-    --font-sans: 'IBM Plex Sans', sans-serif;
-  }
+header { border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:rgba(10,12,15,0.94); backdrop-filter:blur(12px); z-index:100; }
+.logo-mark { width:32px; height:32px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:600; font-size:13px; color:#000; }
+.header-left { display:flex; align-items:center; gap:14px; }
+.header-title { font-family:var(--font-mono); font-size:15px; font-weight:600; }
+.header-title span { color:var(--muted); font-weight:400; }
+.header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.btn { padding:7px 16px; border-radius:7px; font-size:12px; font-family:var(--font-mono); cursor:pointer; border:1px solid var(--border2); background:transparent; color:var(--text); transition:all .15s; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+.btn:hover { border-color:var(--border3); background:var(--bg3); }
+.btn-accent { background:var(--accent); color:#000; border-color:var(--accent); font-weight:600; }
+.btn-accent:hover { background:#d97706; border-color:#d97706; }
+.btn-danger { border-color:rgba(239,68,68,0.4); color:var(--red); }
+.btn-danger:hover { background:rgba(239,68,68,0.1); }
+.source-pill { display:flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--border2); border-radius:20px; font-size:11px; font-family:var(--font-mono); color:var(--muted); }
+.dot { width:6px; height:6px; border-radius:50%; }
+.dot-green { background:var(--green); box-shadow:0 0 6px var(--green); }
+.dot-blue  { background:var(--blue);  box-shadow:0 0 6px var(--blue); }
 
-  html { scroll-behavior: smooth; }
+main { max-width:1280px; margin:0 auto; padding:28px 32px 80px; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    line-height: 1.5;
-    min-height: 100vh;
-  }
+/* KPI */
+.kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:24px; }
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:16px 18px; position:relative; overflow:hidden; transition:border-color .2s; }
+.kpi:hover { border-color:var(--border2); }
+.kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent),transparent); opacity:0; transition:opacity .3s; }
+.kpi:hover::before { opacity:1; }
+.kpi-label { font-size:10px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:8px; }
+.kpi-value { font-family:var(--font-mono); font-size:20px; font-weight:600; letter-spacing:-0.5px; }
+.kpi-sub { font-size:11px; color:var(--muted); margin-top:3px; font-family:var(--font-mono); }
+.pos { color:var(--green); } .neg { color:var(--red); } .neu { color:var(--text); }
 
-  /* ── HEADER ── */
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 20px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    background: rgba(10,12,15,0.92);
-    backdrop-filter: blur(12px);
-    z-index: 100;
-  }
-  .header-left { display: flex; align-items: center; gap: 14px; }
-  .logo-mark {
-    width: 32px; height: 32px;
-    background: var(--accent);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 13px;
-    color: #000;
-    letter-spacing: -0.5px;
-  }
-  .header-title {
-    font-family: var(--font-mono);
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-  }
-  .header-title span { color: var(--muted); font-weight: 400; }
-  .header-right { display: flex; align-items: center; gap: 10px; }
-  .source-pill {
-    display: flex; align-items: center; gap: 6px;
-    padding: 4px 10px;
-    border: 1px solid var(--border2);
-    border-radius: 20px;
-    font-size: 11px;
-    font-family: var(--font-mono);
-    color: var(--muted);
-  }
-  .dot { width: 6px; height: 6px; border-radius: 50%; }
-  .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .dot-blue  { background: var(--blue);  box-shadow: 0 0 6px var(--blue); }
+/* YEAR + MONTH TABS */
+.year-tabs { display:flex; gap:6px; margin-bottom:12px; }
+.year-tab { padding:6px 20px; border:1px solid var(--border2); border-radius:8px; font-size:13px; font-family:var(--font-mono); font-weight:500; cursor:pointer; background:transparent; color:var(--muted); transition:all .15s; }
+.year-tab:hover { color:var(--text); border-color:var(--border3); }
+.year-tab.active { background:var(--accent); color:#000; border-color:var(--accent); }
+.year-tab.all { }
 
-  /* ── MAIN ── */
-  main { max-width: 1200px; margin: 0 auto; padding: 32px 32px 64px; }
+.month-tabs-wrap { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border); min-height:44px; }
+.tab { padding:5px 13px; border:1px solid var(--border); border-radius:6px; font-size:12px; font-family:var(--font-mono); cursor:pointer; background:transparent; color:var(--muted); transition:all .15s; }
+.tab:hover { border-color:var(--border2); color:var(--text); }
+.tab.active { background:var(--text); color:var(--bg); border-color:var(--text); }
+.tab.gs { border-color:#1d4ed855; color:var(--blue); }
+.tab.gs:hover { border-color:var(--blue); }
+.tab.gs.active { background:var(--blue); color:#fff; border-color:var(--blue); }
 
-  /* ── KPI ROW ── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-    margin-bottom: 28px;
-  }
-  @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 600px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+.conflict-bar { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:8px; padding:10px 16px; margin-bottom:18px; font-size:12px; font-family:var(--font-mono); display:none; align-items:center; gap:12px; flex-wrap:wrap; }
+.conflict-bar.show { display:flex; }
+.conflict-tag { background:rgba(239,68,68,0.2); color:#fca5a5; padding:2px 8px; border-radius:4px; font-size:10px; text-transform:uppercase; letter-spacing:.06em; }
 
-  .kpi {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 18px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color .2s;
-  }
-  .kpi:hover { border-color: var(--border2); }
-  .kpi::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0;
-    transition: opacity .3s;
-  }
-  .kpi:hover::before { opacity: 1; }
-  .kpi-label {
-    font-size: 10px;
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-  .kpi-value {
-    font-family: var(--font-mono);
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-  }
-  .kpi-sub {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 3px;
-    font-family: var(--font-mono);
-  }
-  .pos { color: var(--green); }
-  .neg { color: var(--red); }
-  .neu { color: var(--text); }
+.charts-grid { display:grid; grid-template-columns:1fr 400px; gap:16px; margin-bottom:16px; }
+@media(max-width:1050px){.charts-grid{grid-template-columns:1fr}}
+.chart-card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:20px; }
+.chart-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.chart-title { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
 
-  /* ── TABS ── */
-  .tabs-wrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .tab {
-    padding: 5px 13px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 12px;
-    font-family: var(--font-mono);
-    cursor: pointer;
-    background: transparent;
-    color: var(--muted);
-    transition: all .15s;
-  }
-  .tab:hover { border-color: var(--border2); color: var(--text); }
-  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
-  .tab.gs { border-color: #1d4ed855; color: var(--blue); }
-  .tab.gs:hover { border-color: var(--blue); }
-  .tab.gs.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-  .gs-mark { font-size: 9px; }
+/* PROTOCOL TABLE */
+.proto-table { width:100%; border-collapse:collapse; font-size:11px; }
+.proto-table th { font-size:9px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.08em; color:var(--muted2); padding:0 8px 8px; text-align:right; font-weight:400; }
+.proto-table th:first-child { text-align:left; }
+.proto-table td { padding:7px 8px; font-family:var(--font-mono); border-top:1px solid var(--border); text-align:right; vertical-align:middle; }
+.proto-table td:first-child { text-align:left; }
+.proto-table tr:hover td { background:var(--bg3); }
+.proto-color-dot { display:inline-block; width:7px; height:7px; border-radius:2px; margin-right:6px; vertical-align:middle; flex-shrink:0; }
+.apr-wrap { display:flex; align-items:center; gap:5px; justify-content:flex-end; }
+.apr-bar { height:4px; border-radius:2px; min-width:2px; }
+.token-tag { font-size:9px; color:var(--muted); background:var(--bg3); border:1px solid var(--border); border-radius:3px; padding:1px 5px; display:inline-block; }
 
-  /* ── CONFLICT BANNER ── */
-  .conflict-bar {
-    background: rgba(239,68,68,0.08);
-    border: 1px solid rgba(239,68,68,0.25);
-    border-radius: 8px;
-    padding: 10px 16px;
-    margin-bottom: 20px;
-    font-size: 12px;
-    font-family: var(--font-mono);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    display: none;
-  }
-  .conflict-bar.show { display: flex; }
-  .conflict-tag {
-    background: rgba(239,68,68,0.2);
-    color: #fca5a5;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-  }
+.legend-wrap { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+.legend-item { display:flex; align-items:center; gap:6px; font-size:11px; font-family:var(--font-mono); color:var(--muted); }
+.legend-sq { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
 
-  /* ── CHARTS LAYOUT ── */
-  .charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+/* MODALS */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); z-index:200; display:none; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
+.overlay.open { display:flex; }
+.modal { background:var(--bg2); border:1px solid var(--border2); border-radius:14px; width:100%; max-width:660px; margin:auto; }
+.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; border-radius:14px 14px 0 0; background:var(--bg2); }
+.modal-title { font-family:var(--font-mono); font-size:14px; font-weight:600; }
+.modal-close { background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; line-height:1; padding:2px 6px; border-radius:4px; transition:color .15s; }
+.modal-close:hover { color:var(--text); }
+.modal-body { padding:24px; max-height:75vh; overflow-y:auto; }
+.form-group { margin-bottom:16px; }
+.form-label { display:block; font-size:10px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:6px; }
+.form-input, .form-select { width:100%; background:var(--bg3); border:1px solid var(--border2); border-radius:7px; padding:8px 11px; color:var(--text); font-family:var(--font-mono); font-size:12px; outline:none; transition:border-color .15s; }
+.form-input:focus, .form-select:focus { border-color:var(--accent); }
+.form-select option { background:var(--bg2); }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.proto-section-title { font-size:10px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:8px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+.proto-entries { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+.proto-entry-card { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px; position:relative; }
+.proto-entry-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.proto-entry-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.proto-entry-label { font-size:9px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:4px; }
+.remove-entry-btn { position:absolute; top:8px; right:8px; width:22px; height:22px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:5px; color:var(--red); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; padding:0; line-height:1; }
+.remove-entry-btn:hover { background:rgba(239,68,68,0.3); }
+.add-proto-btn { width:100%; padding:9px; background:transparent; border:1px dashed var(--border2); border-radius:7px; color:var(--muted); font-family:var(--font-mono); font-size:12px; cursor:pointer; transition:all .15s; margin-bottom:16px; }
+.add-proto-btn:hover { border-color:var(--accent); color:var(--accent); }
+.total-preview { background:var(--bg3); border:1px solid var(--border); border-radius:7px; padding:10px 14px; font-family:var(--font-mono); font-size:13px; display:flex; justify-content:space-between; align-items:center; }
+.total-label { color:var(--muted); font-size:11px; }
+.total-num { font-size:16px; font-weight:600; }
+.modal-footer { padding:14px 24px 18px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
 
-  .chart-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-  }
-  .chart-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .chart-title {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--muted);
-  }
+.month-manage-list { display:flex; flex-direction:column; gap:6px; }
+.month-manage-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg3); border-radius:8px; border:1px solid var(--border); flex-wrap:wrap; }
+.month-manage-name { font-family:var(--font-mono); font-size:13px; flex:1; min-width:80px; }
+.month-manage-total { font-family:var(--font-mono); font-size:13px; min-width:80px; text-align:right; }
+.src-badge { font-size:10px; font-family:var(--font-mono); padding:2px 7px; border-radius:4px; min-width:52px; text-align:center; }
+.src-xl { background:rgba(34,197,94,0.15); color:var(--green); border:1px solid rgba(34,197,94,0.3); }
+.src-gs { background:rgba(59,130,246,0.15); color:var(--blue); border:1px solid rgba(59,130,246,0.3); }
 
-  /* ── PROTOCOL TABLE ── */
-  .proto-list { display: flex; flex-direction: column; gap: 8px; }
-  .proto-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    transition: background .15s;
-  }
-  .proto-row:hover { background: var(--bg3); }
-  .proto-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-  .proto-name { flex: 1; font-size: 12px; font-family: var(--font-mono); color: var(--text); }
-  .proto-val { font-size: 12px; font-family: var(--font-mono); font-weight: 500; }
-  .proto-pct { font-size: 10px; color: var(--muted); min-width: 32px; text-align: right; font-family: var(--font-mono); }
+.toast { position:fixed; bottom:28px; right:28px; background:var(--bg3); border:1px solid var(--border2); border-radius:9px; padding:12px 18px; font-family:var(--font-mono); font-size:12px; color:var(--text); z-index:999; transform:translateY(80px); opacity:0; transition:all .3s cubic-bezier(.34,1.56,.64,1); pointer-events:none; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.success { border-color:rgba(34,197,94,0.5); }
+.toast.error   { border-color:rgba(239,68,68,0.5); }
 
-  /* ── LEGEND ── */
-  .legend-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-family: var(--font-mono);
-    color: var(--muted);
-  }
-  .legend-sq { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-
-  /* ── FOOTER ── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 20px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 11px;
-    font-family: var(--font-mono);
-    color: var(--muted2);
-  }
-  .footer-sources { display: flex; gap: 16px; }
+footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; font-size:11px; font-family:var(--font-mono); color:var(--muted2); flex-wrap:wrap; gap:8px; }
 </style>
 </head>
 <body>
@@ -281,277 +145,444 @@
     <div class="header-title">Crypto Returns <span>/ Dashboard</span></div>
   </div>
   <div class="header-right">
-    <div class="source-pill"><span class="dot dot-green"></span> Excel</div>
-    <div class="source-pill"><span class="dot dot-blue"></span> Google Sheets</div>
+    <div class="source-pill"><span class="dot dot-green"></span>Excel</div>
+    <div class="source-pill"><span class="dot dot-blue"></span>Google Sheets</div>
+    <button class="btn" onclick="openManageModal()">⚙ Manage</button>
+    <button class="btn btn-accent" onclick="openAddModal()">+ Add month</button>
   </div>
 </header>
 
 <main>
   <div class="kpi-grid" id="kpiGrid"></div>
 
-  <div class="tabs-wrap" id="tabsWrap"></div>
+  <!-- Year tabs -->
+  <div class="year-tabs" id="yearTabs"></div>
+  <!-- Month tabs -->
+  <div class="month-tabs-wrap" id="monthTabs"></div>
 
   <div class="conflict-bar" id="conflictBar">
     <span class="conflict-tag">⚠ Conflict</span>
     <span id="conflictText"></span>
   </div>
-
   <div class="legend-wrap" id="legendWrap"></div>
 
   <div class="charts-grid">
     <div class="chart-card">
-      <div class="chart-header">
-        <span class="chart-title" id="barTitle">Monthly returns</span>
-      </div>
-      <div style="position:relative;height:300px">
-        <canvas id="barChart" role="img" aria-label="Monthly crypto returns"></canvas>
-      </div>
+      <div class="chart-header"><span class="chart-title" id="barTitle">Monthly returns</span></div>
+      <div style="position:relative;height:300px"><canvas id="barChart"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-header">
         <span class="chart-title">Protocol breakdown</span>
+        <span style="font-size:10px;font-family:var(--font-mono);color:var(--muted)">hover for details</span>
       </div>
-      <div style="position:relative;height:180px;margin-bottom:16px">
-        <canvas id="pieChart" role="img" aria-label="Return share by protocol"></canvas>
-      </div>
-      <div class="proto-list" id="protoList"></div>
+      <div style="position:relative;height:180px;margin-bottom:16px"><canvas id="pieChart"></canvas></div>
+      <div id="protoTableWrap" style="overflow-x:auto"></div>
     </div>
   </div>
 </main>
 
 <footer>
   <span>Crypto Returns Dashboard</span>
-  <div class="footer-sources">
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
     <span><span style="color:var(--green)">▪</span> Excel = source of record</span>
-    <span><span style="color:var(--blue)">◆</span> Google Sheets = overrides Excel</span>
+    <span><span style="color:var(--blue)">◆</span> Google Sheets = overrides</span>
+    <span id="lastSaved" style="color:var(--muted2)"></span>
   </div>
 </footer>
 
+<!-- ADD / EDIT MODAL -->
+<div class="overlay" id="addOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Add new month</span>
+      <button class="modal-close" onclick="closeAddModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Month name</label>
+          <input class="form-input" id="inputMonth" placeholder="e.g. FEB 26" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Source</label>
+          <select class="form-select" id="inputSource">
+            <option value="xl">Excel</option>
+            <option value="gs">Google Sheets</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" id="conflictGroup" style="display:none">
+        <label class="form-label">Excel total ($) — for conflict display</label>
+        <input class="form-input" id="inputXlTotal" type="number" placeholder="e.g. 977" />
+      </div>
+      <div class="proto-section-title">Protocols — investment & returns</div>
+      <div class="proto-entries" id="protoEntries"></div>
+      <button class="add-proto-btn" onclick="addProtoRow()">+ Add protocol</button>
+      <div class="total-preview">
+        <span class="total-label">Calculated monthly total</span>
+        <span class="total-num neu" id="totalPreview">$0</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="saveMonth()">Save month</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE MODAL -->
+<div class="overlay" id="manageOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Manage months</span>
+      <button class="modal-close" onclick="closeManageModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-bottom:16px">Click Edit to update data, or Delete to remove a month.</p>
+      <div class="month-manage-list" id="manageList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="exportJSON()">↓ Export JSON</button>
+      <button class="btn" onclick="closeManageModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-const RAW = {
-  "JUN 24": {total:307,   source:"xl", rows:[{p:"Binance",v:190},{p:"SyncSwap",v:31},{p:"Mode",v:55},{p:"Kamino",v:31}]},
-  "JUL 24": {total:902,   source:"xl", rows:[{p:"Binance",v:162},{p:"SyncSwap",v:33},{p:"Mode",v:56},{p:"Kamino",v:204},{p:"Sanctum",v:215},{p:"BlockCentral",v:62},{p:"Ref Finance",v:170}]},
-  "AUG 24": {total:838,   source:"xl", rows:[{p:"Binance",v:117},{p:"SyncSwap",v:506},{p:"Kamino",v:7},{p:"BlockCentral",v:48},{p:"TRX Bot",v:27},{p:"Ref Finance",v:133}]},
-  "SEP 24": {total:1328,  source:"xl", rows:[{p:"Ref Finance",v:249},{p:"Binance",v:120},{p:"SyncSwap",v:54},{p:"Kamino",v:708},{p:"BlockCentral",v:97},{p:"TRX Bot",v:100}]},
-  "NOV 24": {total:1355,  source:"xl", rows:[{p:"Ref Finance",v:106},{p:"Binance",v:162},{p:"SyncSwap",v:140},{p:"Kamino",v:300},{p:"BlockCentral",v:80},{p:"TRX Bot",v:157},{p:"Sanctum",v:410}]},
-  "DEC 24": {total:1006,  source:"xl", rows:[{p:"Ref Finance",v:180},{p:"Fuel",v:141},{p:"Binance",v:54},{p:"SyncSwap",v:15},{p:"Kamino",v:362},{p:"BlockCentral",v:55},{p:"TRX Bot",v:200}]},
-  "JAN 25": {total:-1133, source:"gs", xlTotal:977, conflict:true,  rows:[{p:"TRX Bot",v:63},{p:"Kamino",v:-1309},{p:"DOT Staking",v:8},{p:"AERO Staking",v:70},{p:"GMX Staking",v:24},{p:"PYTH",v:10}]},
-  "FEB 25": {total:120,   source:"xl", rows:[{p:"TRX Bot",v:172},{p:"Kamino",v:383},{p:"Kamino",v:-566},{p:"Aerodrome",v:-500},{p:"Cetus",v:64},{p:"Meridian",v:361}]},
-  "MAR 25": {total:546,   source:"xl", rows:[{p:"TRX Bot",v:193},{p:"Kamino",v:230},{p:"Cetus",v:19},{p:"Fuel",v:11},{p:"Meridian",v:62},{p:"DOT Staking",v:31}]},
-  "APR 25": {total:745,   source:"xl", rows:[{p:"TRX Bot",v:206},{p:"Kamino",v:530},{p:"Cetus",v:114},{p:"Meridian",v:-155},{p:"DOT Staking",v:21},{p:"NEAR Staking",v:29}]},
-  "MAY 25": {total:771,   source:"xl", rows:[{p:"TRX Bot",v:264},{p:"Kamino",v:375},{p:"DOT Staking",v:28},{p:"NEAR Staking",v:20},{p:"Kamino Airdrop",v:83}]},
-  "JUN 25": {total:-60,   source:"xl", rows:[{p:"TRX Bot",v:217},{p:"Kamino",v:-54},{p:"Cetus",v:-300},{p:"DOT Staking",v:22},{p:"NEAR Staking",v:18},{p:"USDC Autopilot",v:37}]},
-  "AUG 25": {total:806,   source:"xl", rows:[{p:"TRX Bot",v:148},{p:"Kamino",v:504},{p:"Aerodrome",v:39},{p:"Cetus",v:13},{p:"DOT Staking",v:23},{p:"NEAR Staking",v:16},{p:"MGX Staking",v:21},{p:"USDC Autopilot",v:42}]},
-  "SEP 25": {total:806,   source:"xl", rows:[{p:"TRX Bot",v:148},{p:"Kamino",v:504},{p:"Aerodrome",v:39},{p:"Cetus",v:13},{p:"DOT Staking",v:23},{p:"NEAR Staking",v:16},{p:"MGX Staking",v:21},{p:"USDC Autopilot",v:42}]},
-  "OCT 25": {total:593,   source:"xl", rows:[{p:"TRX Bot",v:44},{p:"Kamino",v:365},{p:"Cetus",v:-10},{p:"DOT Staking",v:39},{p:"NEAR Staking",v:13},{p:"AERO Staking",v:41},{p:"MGX Staking",v:59},{p:"SideShift",v:2},{p:"USDC Autopilot",v:40}]},
-  "NOV 25": {total:-941,  source:"gs", xlTotal:371, conflict:true,  rows:[{p:"TRX Bot",v:47},{p:"Kamino",v:-1194},{p:"Cetus",v:9},{p:"DOT Staking",v:13},{p:"AERO Staking",v:131},{p:"GMX Staking",v:48},{p:"PYTH",v:4}]},
-  "DEC 25": {total:47,    source:"gs", conflict:false, rows:[{p:"TRX Bot",v:89},{p:"Kamino",v:-174},{p:"DOT Staking",v:14},{p:"AERO Staking",v:80},{p:"GMX Staking",v:39},{p:"PYTH",v:0}]}
+const DEFAULT_DATA = {
+  "JUN 24":{total:307,source:"xl",rows:[{p:"Binance",v:190,qty:null,token:null,investUsd:28000},{p:"SyncSwap",v:31,qty:1.039,token:"ETH",investUsd:3400},{p:"Mode",v:55,qty:67555,token:"MODE",investUsd:1300},{p:"Kamino",v:31,qty:53,token:"SOL",investUsd:8400}]},
+  "JUL 24":{total:902,source:"xl",rows:[{p:"Binance",v:162,qty:null,token:null,investUsd:28500},{p:"SyncSwap",v:33,qty:1.039,token:"ETH",investUsd:3400},{p:"Mode",v:56,qty:67555,token:"MODE",investUsd:1300},{p:"Kamino",v:204,qty:38.38,token:"SOL",investUsd:8400},{p:"Sanctum",v:215,qty:72,token:"SOL",investUsd:10080},{p:"BlockCentral",v:62,qty:167.21,token:"LP",investUsd:2123},{p:"Ref Finance",v:170,qty:240,token:"NEAR",investUsd:2400}]},
+  "AUG 24":{total:838,source:"xl",rows:[{p:"Binance",v:117,qty:null,token:null,investUsd:19608},{p:"SyncSwap",v:506,qty:1.039,token:"ETH",investUsd:3400},{p:"Kamino",v:7,qty:46.11,token:"SOL",investUsd:7500},{p:"BlockCentral",v:48,qty:176.85,token:"LP",investUsd:2123},{p:"TRX Bot",v:27,qty:31200,token:"TRX",investUsd:2808},{p:"Ref Finance",v:133,qty:120,token:"NEAR",investUsd:1200}]},
+  "SEP 24":{total:1328,source:"xl",rows:[{p:"Ref Finance",v:249,qty:340,token:"NEAR",investUsd:3400},{p:"Binance",v:120,qty:null,token:null,investUsd:21000},{p:"SyncSwap",v:54,qty:1.239,token:"ETH",investUsd:3373},{p:"Kamino",v:708,qty:461.11,token:"SOL+JLP",investUsd:10539},{p:"BlockCentral",v:97,qty:186,token:"LP",investUsd:1800},{p:"TRX Bot",v:100,qty:31372,token:"TRX",investUsd:4778}]},
+  "NOV 24":{total:1355,source:"xl",rows:[{p:"Ref Finance",v:106,qty:453.8,token:"NEAR",investUsd:3309},{p:"Binance",v:162,qty:null,token:null,investUsd:21600},{p:"SyncSwap",v:140,qty:1.277,token:"ETH",investUsd:4720},{p:"Kamino",v:300,qty:72,token:"SOL",investUsd:12800},{p:"BlockCentral",v:80,qty:192.49,token:"LP",investUsd:2500},{p:"TRX Bot",v:157,qty:40660,token:"TRX",investUsd:4931},{p:"Sanctum",v:410,qty:0,token:"CLOUD",investUsd:0}]},
+  "DEC 24":{total:1006,source:"xl",rows:[{p:"Ref Finance",v:180,qty:457,token:"NEAR",investUsd:2290},{p:"Fuel",v:141,qty:0,token:"FUEL",investUsd:0},{p:"Binance",v:54,qty:null,token:null,investUsd:10167},{p:"SyncSwap",v:15,qty:1.281,token:"ETH",investUsd:4720},{p:"Kamino",v:362,qty:1134,token:"JLP+USDS",investUsd:16000},{p:"BlockCentral",v:55,qty:197.4,token:"LP",investUsd:2200},{p:"TRX Bot",v:200,qty:50021,token:"TRX",investUsd:12751}]},
+  "JAN 25":{total:-1133,source:"gs",xlTotal:977,conflict:true,rows:[{p:"TRX Bot",v:63,qty:25621,token:"TRX",investUsd:7248},{p:"Kamino",v:-1309,qty:3023,token:"JLP",investUsd:12364},{p:"DOT Staking",v:8,qty:782,token:"DOT",investUsd:1228},{p:"AERO Staking",v:70,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:24,qty:327.7,token:"GMX",investUsd:2110},{p:"PYTH",v:10,qty:26161,token:"PYTH",investUsd:1602}]},
+  "FEB 25":{total:120,source:"xl",rows:[{p:"TRX Bot",v:172,qty:62619,token:"TRX",investUsd:14423},{p:"Kamino",v:383,qty:471.35,token:"JLP",investUsd:3320},{p:"Kamino",v:-566,qty:984.4,token:"JLP",investUsd:3777},{p:"Aerodrome",v:-500,qty:0.1862,token:"WETH",investUsd:622},{p:"Cetus",v:64,qty:14666,token:"CETUS",investUsd:1967},{p:"Meridian",v:361,qty:18347,token:"MST",investUsd:1765}]},
+  "MAR 25":{total:546,source:"xl",rows:[{p:"TRX Bot",v:193,qty:63485,token:"TRX",investUsd:14920},{p:"Kamino",v:230,qty:1048,token:"JLP+JITOSOL",investUsd:15791},{p:"Cetus",v:19,qty:13399,token:"CETUS",investUsd:1714},{p:"Fuel",v:11,qty:611500,token:"FUEL",investUsd:695},{p:"Meridian",v:62,qty:0.767,token:"EZETH",investUsd:1461},{p:"DOT Staking",v:31,qty:723.5,token:"DOT",investUsd:2950}]},
+  "APR 25":{total:745,source:"xl",rows:[{p:"TRX Bot",v:206,qty:69871,token:"TRX",investUsd:16265},{p:"Kamino",v:530,qty:2454,token:"JLP+JITOSOL+MPLX",investUsd:18768},{p:"Cetus",v:114,qty:10795,token:"CETUS+SUI",investUsd:1714},{p:"Meridian",v:-155,qty:0.8,token:"EZETH",investUsd:1560},{p:"DOT Staking",v:21,qty:729,token:"DOT",investUsd:3053},{p:"NEAR Staking",v:29,qty:1246,token:"NEAR",investUsd:3223}]},
+  "MAY 25":{total:771,source:"xl",rows:[{p:"TRX Bot",v:264,qty:71423,token:"TRX",investUsd:19199},{p:"Kamino",v:375,qty:1268,token:"JLP+JITOSOL+MPLX",investUsd:14802},{p:"DOT Staking",v:28,qty:735.5,token:"DOT",investUsd:2978},{p:"NEAR Staking",v:20,qty:1961,token:"NEAR",investUsd:4715},{p:"Kamino Airdrop",v:83,qty:1600,token:"KMNO",investUsd:0}]},
+  "JUN 25":{total:-60,source:"xl",rows:[{p:"TRX Bot",v:217,qty:72199,token:"TRX",investUsd:20144},{p:"Kamino",v:-54,qty:1306,token:"JLP+JITOSOL",investUsd:10207},{p:"Cetus",v:-300,qty:17651,token:"CETUS+SUI",investUsd:1600},{p:"DOT Staking",v:22,qty:742,token:"DOT",investUsd:2478},{p:"NEAR Staking",v:18,qty:1969,token:"NEAR",investUsd:4135},{p:"USDC Autopilot",v:37,qty:5926,token:"USDC",investUsd:5926}]},
+  "AUG 25":{total:806,source:"xl",rows:[{p:"TRX Bot",v:148,qty:73439,token:"TRX",investUsd:25035},{p:"Kamino",v:504,qty:1732,token:"JLP",investUsd:9387},{p:"Aerodrome",v:39,qty:0.18622,token:"AERO",investUsd:525},{p:"Cetus",v:13,qty:8266,token:"CETUS+SUI",investUsd:1613},{p:"DOT Staking",v:23,qty:748.86,token:"DOT",investUsd:2898},{p:"NEAR Staking",v:16,qty:1711.7,token:"NEAR",investUsd:4190},{p:"MGX Staking",v:21,qty:319.27,token:"GMX",investUsd:0},{p:"USDC Autopilot",v:42,qty:6009,token:"USDC",investUsd:6009}]},
+  "SEP 25":{total:806,source:"xl",rows:[{p:"TRX Bot",v:148,qty:73439,token:"TRX",investUsd:25035},{p:"Kamino",v:504,qty:1732,token:"JLP",investUsd:9387},{p:"Aerodrome",v:39,qty:0.18622,token:"AERO",investUsd:525},{p:"Cetus",v:13,qty:8266,token:"CETUS+SUI",investUsd:1613},{p:"DOT Staking",v:23,qty:748.86,token:"DOT",investUsd:2898},{p:"NEAR Staking",v:16,qty:1711.7,token:"NEAR",investUsd:4190},{p:"MGX Staking",v:21,qty:319.27,token:"GMX",investUsd:0},{p:"USDC Autopilot",v:42,qty:6009,token:"USDC",investUsd:6009}]},
+  "OCT 25":{total:593,source:"xl",rows:[{p:"TRX Bot",v:44,qty:23423,token:"TRX",investUsd:6825},{p:"Kamino",v:365,qty:1796.25,token:"JLP",investUsd:10239},{p:"Cetus",v:-10,qty:14741,token:"CETUS+SUI",investUsd:1520},{p:"DOT Staking",v:39,qty:769.77,token:"DOT",investUsd:2186},{p:"NEAR Staking",v:13,qty:1719.32,token:"NEAR",investUsd:4814},{p:"AERO Staking",v:41,qty:2598,token:"USDC",investUsd:2598},{p:"MGX Staking",v:59,qty:319.27,token:"GMX",investUsd:4974},{p:"SideShift",v:2,qty:2347,token:"XAI",investUsd:369},{p:"USDC Autopilot",v:40,qty:6040,token:"USDC",investUsd:6040}]},
+  "NOV 25":{total:-941,source:"gs",xlTotal:371,conflict:true,rows:[{p:"TRX Bot",v:47,qty:23740,token:"TRX",investUsd:6647},{p:"Kamino",v:-1194,qty:1538,token:"JLP",investUsd:7259},{p:"Cetus",v:9,qty:650,token:"CETUS+SUI",investUsd:1003},{p:"DOT Staking",v:13,qty:775,token:"DOT",investUsd:1783},{p:"AERO Staking",v:131,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:48,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:4,qty:9400,token:"PYTH",investUsd:705}]},
+  "DEC 25":{total:47,source:"gs",conflict:false,rows:[{p:"TRX Bot",v:89,qty:25310,token:"TRX",investUsd:7216},{p:"Kamino",v:-174,qty:1538,token:"JLP",investUsd:7059},{p:"DOT Staking",v:14,qty:775,token:"DOT",investUsd:1550},{p:"AERO Staking",v:80,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:39,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:0,qty:26000,token:"PYTH",investUsd:1602}]}
 };
 
-const COLORS = {
-  "Kamino":"#3b82f6","TRX Bot":"#22c55e","Binance":"#f59e0b","Ref Finance":"#ef4444",
-  "SyncSwap":"#8b5cf6","Sanctum":"#d97706","BlockCentral":"#ec4899","Aerodrome":"#84cc16",
-  "Cetus":"#06b6d4","Meridian":"#f87171","DOT Staking":"#4ade80","NEAR Staking":"#fde68a",
-  "Fuel":"#c084fc","Mode":"#60a5fa","USDC Autopilot":"#2dd4bf","MGX Staking":"#fb923c",
-  "Kamino Airdrop":"#93c5fd","AERO Staking":"#475569","GMX Staking":"#67e8f9",
-  "PYTH":"#a3e635","SideShift":"#94a3b8","Kamino Multiply":"#1d4ed8"
-};
-const gc = p => COLORS[p] || "#6b7280";
+const COLORS={"Kamino":"#3b82f6","TRX Bot":"#22c55e","Binance":"#f59e0b","Ref Finance":"#ef4444","SyncSwap":"#8b5cf6","Sanctum":"#d97706","BlockCentral":"#ec4899","Aerodrome":"#84cc16","Cetus":"#06b6d4","Meridian":"#f87171","DOT Staking":"#4ade80","NEAR Staking":"#fde68a","Fuel":"#c084fc","Mode":"#60a5fa","USDC Autopilot":"#2dd4bf","MGX Staking":"#fb923c","Kamino Airdrop":"#93c5fd","AERO Staking":"#64748b","GMX Staking":"#67e8f9","PYTH":"#a3e635","SideShift":"#94a3b8"};
+const COLOR_POOL=["#3b82f6","#22c55e","#f59e0b","#ef4444","#8b5cf6","#d97706","#ec4899","#84cc16","#06b6d4","#f87171","#4ade80","#fde68a","#c084fc","#60a5fa","#2dd4bf","#fb923c","#93c5fd","#64748b","#67e8f9","#a3e635","#94a3b8"];
+let colorIdx=0;
+const gc=p=>{if(!COLORS[p]){COLORS[p]=COLOR_POOL[colorIdx%COLOR_POOL.length];colorIdx++;}return COLORS[p];};
 
-const MONTHS = Object.keys(RAW);
-let active = "ALL";
-let barChart = null, pieChart = null;
+let RAW={}, active="ALL", activeYear="ALL", barChart=null, pieChart=null, editingMonth=null;
 
-function agg(rows) {
-  const m = {};
-  rows.forEach(r => { if (!m[r.p]) m[r.p] = 0; m[r.p] += r.v; });
+function loadData(){try{const s=localStorage.getItem('crypto_dash_v4');if(s){RAW=JSON.parse(s);updateLastSaved();return;}}catch(e){}RAW=JSON.parse(JSON.stringify(DEFAULT_DATA));}
+function saveData(){localStorage.setItem('crypto_dash_v4',JSON.stringify(RAW));document.getElementById('lastSaved').textContent='Saved '+new Date().toLocaleTimeString();}
+function updateLastSaved(){if(localStorage.getItem('crypto_dash_v4'))document.getElementById('lastSaved').textContent='Loaded from storage';}
+
+const fmt=v=>(v<0?'-':'')+'$'+Math.abs(Math.round(v)).toLocaleString();
+const fmtPct=v=>(v>=0?'+':'')+v.toFixed(1)+'%';
+const fmtQty=q=>q===null||q===undefined?'—':(q>1000?q.toLocaleString(undefined,{maximumFractionDigits:0}):parseFloat(q.toFixed(4)).toString());
+
+function getMonths(){return Object.keys(RAW);}
+function getYear(m){return m.slice(-2);}  // "JUN 24" -> "24"
+function getYears(){return [...new Set(getMonths().map(getYear))].sort();}
+function getMonthsForYear(yr){return yr==="ALL"?getMonths():getMonths().filter(m=>getYear(m)===yr);}
+
+function aggRows(rows){
+  const m={};
+  rows.forEach(r=>{
+    if(!m[r.p])m[r.p]={v:0,qty:r.qty,token:r.token,investUsd:0};
+    m[r.p].v+=r.v;
+    m[r.p].investUsd+=(r.investUsd||0);
+    if(r.qty&&!m[r.p].qty){m[r.p].qty=r.qty;m[r.p].token=r.token;}
+  });
   return m;
 }
-
-function fmt(v) {
-  const abs = Math.abs(Math.round(v));
-  return (v < 0 ? '-' : '') + '$' + abs.toLocaleString();
+function calcAPR(monthlyReturn,investUsd){
+  if(!investUsd||investUsd<=0)return null;
+  return(monthlyReturn*12/investUsd)*100;
 }
 
-function renderKPI(month) {
-  const el = document.getElementById('kpiGrid');
-  if (month === 'ALL') {
-    let sum = 0, bestV = -Infinity, worstV = Infinity, bestM = '', worstM = '';
-    MONTHS.forEach(m => {
-      const v = RAW[m].total; sum += v;
-      if (v > bestV) { bestV = v; bestM = m; }
-      if (v < worstV) { worstV = v; worstM = m; }
+// ── KPI ──
+function renderKPI(month){
+  const el=document.getElementById('kpiGrid');
+  const visibleMonths = getMonthsForYear(activeYear).filter(m=>month==="ALL"||m===month);
+
+  if(month==="ALL"){
+    let sum=0,bestV=-Infinity,worstV=Infinity,bestM='',worstM='',totalInvest=0;
+    const months = getMonthsForYear(activeYear);
+    months.forEach(m=>{
+      const v=RAW[m].total; sum+=v;
+      if(v>bestV){bestV=v;bestM=m;} if(v<worstV){worstV=v;worstM=m;}
     });
-    const avg = Math.round(sum / MONTHS.length);
-    const gsMths = MONTHS.filter(m => RAW[m].source === 'gs').length;
-    el.innerHTML = `
-      <div class="kpi"><div class="kpi-label">Total return</div><div class="kpi-value ${sum>=0?'pos':'neg'}">${fmt(sum)}</div><div class="kpi-sub">all time</div></div>
+    // total invested = latest month's investment (most recent snapshot)
+    const lastMonth = months[months.length-1];
+    if(lastMonth){const a=aggRows(RAW[lastMonth].rows);Object.values(a).forEach(d=>{totalInvest+=d.investUsd||0;});}
+    const avg=months.length?Math.round(sum/months.length):0;
+    const gsMths=months.filter(m=>RAW[m].source==='gs').length;
+    el.innerHTML=`
+      <div class="kpi"><div class="kpi-label">Total return</div><div class="kpi-value ${sum>=0?'pos':'neg'}">${fmt(sum)}</div><div class="kpi-sub">${activeYear==="ALL"?"all time":activeYear}</div></div>
       <div class="kpi"><div class="kpi-label">Monthly avg</div><div class="kpi-value neu">${fmt(avg)}</div><div class="kpi-sub">per month</div></div>
-      <div class="kpi"><div class="kpi-label">Best month</div><div class="kpi-value pos">${fmt(bestV)}</div><div class="kpi-sub">${bestM}</div></div>
-      <div class="kpi"><div class="kpi-label">Worst month</div><div class="kpi-value neg">${fmt(worstV)}</div><div class="kpi-sub">${worstM}</div></div>
-      <div class="kpi"><div class="kpi-label">Tracked</div><div class="kpi-value neu">${MONTHS.length}</div><div class="kpi-sub">${gsMths} from Sheets</div></div>
-    `;
+      <div class="kpi"><div class="kpi-label">Total invested</div><div class="kpi-value neu" style="font-size:18px">${fmt(totalInvest)}</div><div class="kpi-sub">latest snapshot</div></div>
+      <div class="kpi"><div class="kpi-label">Best month</div><div class="kpi-value pos" style="font-size:16px">${fmt(bestV)}</div><div class="kpi-sub">${bestM}</div></div>
+      <div class="kpi"><div class="kpi-label">Worst month</div><div class="kpi-value neg" style="font-size:16px">${fmt(worstV)}</div><div class="kpi-sub">${worstM}</div></div>
+      <div class="kpi"><div class="kpi-label">Months</div><div class="kpi-value neu">${months.length}</div><div class="kpi-sub">${gsMths} from Sheets</div></div>`;
   } else {
-    const d = RAW[month];
-    const aggd = agg(d.rows);
-    const ents = Object.entries(aggd);
-    const best = ents.length ? ents.reduce((a,b) => b[1]>a[1]?b:a) : ['—', 0];
-    const worst = ents.length ? ents.reduce((a,b) => b[1]<a[1]?b:a) : ['—', 0];
-    const srcLabel = d.source === 'gs' ? '<span style="color:var(--blue)">◆ Sheets</span>' : '<span style="color:var(--green)">▪ Excel</span>';
-    el.innerHTML = `
+    const d=RAW[month];
+    const aggd=aggRows(d.rows);
+    const ents=Object.entries(aggd);
+    const best=ents.length?ents.reduce((a,b)=>b[1].v>a[1].v?b:a):['—',{v:0}];
+    const worst=ents.length?ents.reduce((a,b)=>b[1].v<a[1].v?b:a):['—',{v:0}];
+    const totalInvest=ents.reduce((s,[,d])=>s+(d.investUsd||0),0);
+    const actualAPR=totalInvest>0?calcAPR(d.total,totalInvest):null;
+    const srcLabel=d.source==='gs'?'<span style="color:var(--blue)">◆ Sheets</span>':'<span style="color:var(--green)">▪ Excel</span>';
+    el.innerHTML=`
       <div class="kpi"><div class="kpi-label">Return ${srcLabel}</div><div class="kpi-value ${d.total>=0?'pos':'neg'}">${fmt(d.total)}</div><div class="kpi-sub">${month}</div></div>
-      <div class="kpi"><div class="kpi-label">Best protocol</div><div class="kpi-value pos" style="font-size:16px">${fmt(best[1])}</div><div class="kpi-sub">${best[0]}</div></div>
-      <div class="kpi"><div class="kpi-label">Worst protocol</div><div class="kpi-value neg" style="font-size:16px">${fmt(worst[1])}</div><div class="kpi-sub">${worst[0]}</div></div>
-      <div class="kpi"><div class="kpi-label">Protocols</div><div class="kpi-value neu">${ents.length}</div><div class="kpi-sub">active</div></div>
-    `;
+      <div class="kpi"><div class="kpi-label">Total invested</div><div class="kpi-value neu" style="font-size:18px">${fmt(totalInvest)}</div><div class="kpi-sub">this month</div></div>
+      <div class="kpi"><div class="kpi-label">Actual APR</div><div class="kpi-value ${actualAPR!=null&&actualAPR>=0?'pos':'neg'}" style="font-size:18px">${actualAPR!=null?fmtPct(actualAPR):'—'}</div><div class="kpi-sub">annualised</div></div>
+      <div class="kpi"><div class="kpi-label">Best protocol</div><div class="kpi-value pos" style="font-size:16px">${fmt(best[1].v)}</div><div class="kpi-sub">${best[0]}</div></div>
+      <div class="kpi"><div class="kpi-label">Worst protocol</div><div class="kpi-value neg" style="font-size:16px">${fmt(worst[1].v)}</div><div class="kpi-sub">${worst[0]}</div></div>
+      <div class="kpi"><div class="kpi-label">Protocols</div><div class="kpi-value neu">${ents.length}</div><div class="kpi-sub">active</div></div>`;
   }
 }
 
-function renderConflict(month) {
-  const bar = document.getElementById('conflictBar');
-  const txt = document.getElementById('conflictText');
-  if (month === 'ALL' || !RAW[month] || !RAW[month].conflict) { bar.classList.remove('show'); return; }
-  const d = RAW[month];
-  bar.classList.add('show');
-  txt.innerHTML = `Google Sheets: <span class="${d.total>=0?'pos':'neg'}" style="font-weight:600">${fmt(d.total)}</span>
+function renderConflict(month){
+  const bar=document.getElementById('conflictBar'),txt=document.getElementById('conflictText');
+  if(month==="ALL"||!RAW[month]||!RAW[month].conflict){bar.classList.remove('show');return;}
+  const d=RAW[month];bar.classList.add('show');
+  txt.innerHTML=`Google Sheets: <span class="${d.total>=0?'pos':'neg'}" style="font-weight:600">${fmt(d.total)}</span>
     &nbsp;·&nbsp; Excel was: <span style="color:var(--muted)">${fmt(d.xlTotal)}</span>
-    &nbsp;·&nbsp; Δ <span class="neg">${fmt(d.total - d.xlTotal)}</span>
-    &nbsp;·&nbsp; Google Sheets data is used.`;
+    &nbsp;·&nbsp; Δ <span class="neg">${fmt(d.total-d.xlTotal)}</span> — Google Sheets wins.`;
 }
 
-function renderBar(month) {
-  if (barChart) barChart.destroy();
-  document.getElementById('barTitle').textContent = month === 'ALL' ? 'Monthly returns' : `${month} — by protocol`;
-  let labels, data, colors;
-  if (month === 'ALL') {
-    labels = MONTHS;
-    data = MONTHS.map(m => RAW[m].total);
-    colors = MONTHS.map(m => {
-      const d = RAW[m];
-      if (d.source === 'gs') return d.total >= 0 ? '#3b82f6' : '#93c5fd';
-      return d.total >= 0 ? '#22c55e' : '#ef4444';
-    });
+function renderBar(month){
+  if(barChart)barChart.destroy();
+  const months=getMonthsForYear(activeYear);
+  document.getElementById('barTitle').textContent=month==="ALL"?`Monthly returns${activeYear!=="ALL"?' — '+activeYear:''}`:`${month} — by protocol`;
+  let labels,data,colors;
+  if(month==="ALL"){
+    labels=months; data=months.map(m=>RAW[m].total);
+    colors=months.map(m=>{const d=RAW[m];return d.source==='gs'?(d.total>=0?'#3b82f6':'#93c5fd'):(d.total>=0?'#22c55e':'#ef4444');});
   } else {
-    const aggd = agg(RAW[month].rows);
-    const sorted = Object.entries(aggd).sort((a,b) => b[1]-a[1]);
-    labels = sorted.map(e => e[0]);
-    data = sorted.map(e => Math.round(e[1]));
-    colors = sorted.map(e => gc(e[0]));
+    const sorted=Object.entries(aggRows(RAW[month].rows)).sort((a,b)=>b[1].v-a[1].v);
+    labels=sorted.map(e=>e[0]); data=sorted.map(e=>Math.round(e[1].v)); colors=sorted.map(e=>gc(e[0]));
   }
-  barChart = new Chart(document.getElementById('barChart').getContext('2d'), {
-    type: 'bar',
-    data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 4, borderSkipped: false }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1a1f26',
-          borderColor: 'rgba(255,255,255,0.1)',
-          borderWidth: 1,
-          titleFont: { family: "'IBM Plex Mono'" },
-          bodyFont: { family: "'IBM Plex Mono'" },
-          callbacks: { label: c => ' ' + fmt(c.raw) }
-        }
-      },
-      scales: {
-        y: {
-          ticks: { color: '#6b7280', font: { family: "'IBM Plex Mono'", size: 10 }, callback: v => '$'+v.toLocaleString() },
-          grid: { color: 'rgba(255,255,255,0.05)' },
-          border: { color: 'rgba(255,255,255,0.07)' }
-        },
-        x: {
-          ticks: { color: '#6b7280', font: { family: "'IBM Plex Mono'", size: 10 }, maxRotation: 40, autoSkip: false },
-          grid: { display: false },
-          border: { color: 'rgba(255,255,255,0.07)' }
-        }
-      }
-    }
+  barChart=new Chart(document.getElementById('barChart').getContext('2d'),{
+    type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1f26',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleFont:{family:"'IBM Plex Mono'"},bodyFont:{family:"'IBM Plex Mono'"},callbacks:{label:c=>' '+fmt(c.raw)}}},
+      scales:{y:{ticks:{color:'#6b7280',font:{family:"'IBM Plex Mono'",size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(255,255,255,0.05)'},border:{color:'rgba(255,255,255,0.07)'}},x:{ticks:{color:'#6b7280',font:{family:"'IBM Plex Mono'",size:10},maxRotation:40,autoSkip:false},grid:{display:false},border:{color:'rgba(255,255,255,0.07)'}}}}
   });
 }
 
-function renderPie(month) {
-  if (pieChart) pieChart.destroy();
-  let aggd = {};
-  if (month === 'ALL') {
-    MONTHS.forEach(m => RAW[m].rows.forEach(r => { if (!aggd[r.p]) aggd[r.p]=0; aggd[r.p]+=r.v; }));
-  } else { aggd = agg(RAW[month].rows); }
+function renderProtoTable(month){
+  if(pieChart)pieChart.destroy();
+  let aggd={};
+  const months=getMonthsForYear(activeYear);
+  if(month==="ALL"){
+    months.forEach(m=>{
+      const a=aggRows(RAW[m].rows);
+      Object.entries(a).forEach(([p,d])=>{if(!aggd[p])aggd[p]={v:0,investUsd:0,token:d.token,qty:d.qty};aggd[p].v+=d.v;aggd[p].investUsd+=d.investUsd||0;});
+    });
+  } else { aggd=aggRows(RAW[month].rows); }
 
-  const sorted = Object.entries(aggd).filter(e => e[1] > 0).sort((a,b) => b[1]-a[1]);
-  const total = sorted.reduce((s,e) => s+e[1], 0);
+  const sorted=Object.entries(aggd).sort((a,b)=>b[1].v-a[1].v);
+  const posTotal=sorted.filter(e=>e[1].v>0).reduce((s,e)=>s+e[1].v,0);
+  const maxAPR=Math.max(1,...sorted.map(([,d])=>{const a=calcAPR(d.v,d.investUsd);return a?Math.abs(a):0;}));
 
-  pieChart = new Chart(document.getElementById('pieChart').getContext('2d'), {
-    type: 'doughnut',
-    data: {
-      labels: sorted.map(e => e[0]),
-      datasets: [{ data: sorted.map(e => Math.round(e[1])), backgroundColor: sorted.map(e => gc(e[0])), borderWidth: 0, hoverOffset: 4 }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '65%',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1a1f26',
-          borderColor: 'rgba(255,255,255,0.1)',
-          borderWidth: 1,
-          titleFont: { family: "'IBM Plex Mono'" },
-          bodyFont: { family: "'IBM Plex Mono'" },
-          callbacks: { label: c => ` ${fmt(c.raw)} (${((c.raw/total)*100).toFixed(1)}%)` }
-        }
-      }
-    }
+  const posSorted=sorted.filter(e=>e[1].v>0);
+  pieChart=new Chart(document.getElementById('pieChart').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:posSorted.map(e=>e[0]),datasets:[{data:posSorted.map(e=>Math.round(e[1].v)),backgroundColor:posSorted.map(e=>gc(e[0])),borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1f26',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleFont:{family:"'IBM Plex Mono'"},bodyFont:{family:"'IBM Plex Mono'"},callbacks:{label:c=>` ${fmt(c.raw)} (${posTotal>0?((c.raw/posTotal)*100).toFixed(1):0}%)`}}}}
   });
 
-  // proto list
-  document.getElementById('protoList').innerHTML = sorted.slice(0, 8).map(([p, v]) => `
-    <div class="proto-row">
-      <span class="proto-dot" style="background:${gc(p)}"></span>
-      <span class="proto-name">${p}</span>
-      <span class="proto-val ${v>=0?'pos':'neg'}">${fmt(v)}</span>
-      <span class="proto-pct">${total>0?((v/total)*100).toFixed(0):0}%</span>
-    </div>
-  `).join('');
+  const isAll=month==="ALL";
+  document.getElementById('protoTableWrap').innerHTML=`
+    <table class="proto-table">
+      <thead><tr>
+        <th>Protocol</th>
+        ${!isAll?'<th>Holdings</th>':''}
+        ${!isAll?'<th>Invested</th>':''}
+        <th>Return</th>
+        <th>APR</th>
+      </tr></thead>
+      <tbody>
+        ${sorted.map(([p,d])=>{
+          const apr=calcAPR(d.v,d.investUsd);
+          const barW=apr!==null?Math.min(55,Math.abs(apr)/maxAPR*55):0;
+          const barC=apr!==null?(apr>=0?'var(--green)':'var(--red)'):'var(--muted)';
+          const tok=d.qty&&d.token?`${fmtQty(d.qty)} <span class="token-tag">${d.token}</span>`:'—';
+          return `<tr>
+            <td><span class="proto-color-dot" style="background:${gc(p)}"></span>${p}</td>
+            ${!isAll?`<td style="color:var(--muted)">${tok}</td>`:''}
+            ${!isAll?`<td>${d.investUsd?fmt(d.investUsd):'—'}</td>`:''}
+            <td class="${d.v>=0?'pos':'neg'}">${fmt(d.v)}</td>
+            <td><div class="apr-wrap"><span style="color:${barC};min-width:52px;text-align:right">${apr!==null?fmtPct(apr):'—'}</span><div class="apr-bar" style="width:${barW}px;background:${barC};opacity:0.55"></div></div></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
 }
 
-function renderLegend(month) {
-  let aggd = {};
-  if (month === 'ALL') {
-    MONTHS.forEach(m => RAW[m].rows.forEach(r => { if (!aggd[r.p]) aggd[r.p]=0; aggd[r.p]+=r.v; }));
-  } else { aggd = agg(RAW[month].rows); }
-  const top = Object.entries(aggd).sort((a,b) => b[1]-a[1]).slice(0, 9).map(e => e[0]);
-  document.getElementById('legendWrap').innerHTML = top.map(p => `
-    <span class="legend-item"><span class="legend-sq" style="background:${gc(p)}"></span>${p}</span>
-  `).join('');
+function renderLegend(month){
+  let aggd={};
+  const months=getMonthsForYear(activeYear);
+  if(month==="ALL"){months.forEach(m=>RAW[m].rows.forEach(r=>{if(!aggd[r.p])aggd[r.p]=0;aggd[r.p]+=r.v;}));}
+  else{const a=aggRows(RAW[month].rows);Object.entries(a).forEach(([p,d])=>{aggd[p]=d.v;});}
+  const top=Object.entries(aggd).sort((a,b)=>b[1]-a[1]).slice(0,9).map(e=>e[0]);
+  document.getElementById('legendWrap').innerHTML=top.map(p=>`<span class="legend-item"><span class="legend-sq" style="background:${gc(p)}"></span>${p}</span>`).join('');
 }
 
-function renderAll(month) {
-  renderKPI(month);
-  renderConflict(month);
-  renderBar(month);
-  renderPie(month);
-  renderLegend(month);
+function renderAll(month){
+  renderKPI(month);renderConflict(month);renderBar(month);renderProtoTable(month);renderLegend(month);
 }
 
-function buildTabs() {
-  const wrap = document.getElementById('tabsWrap');
-  const all = ['ALL', ...MONTHS];
-  wrap.innerHTML = all.map(m => {
-    const isGs = m !== 'ALL' && RAW[m] && RAW[m].source === 'gs';
-    return `<button class="tab${isGs?' gs':''}${m===active?' active':''}" data-m="${m}">${m==='ALL'?'All months':m}${isGs?' ◆':''}</button>`;
-  }).join('');
-  wrap.querySelectorAll('.tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      active = btn.dataset.m;
-      wrap.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+// ── YEAR TABS ──
+function buildYearTabs(){
+  const wrap=document.getElementById('yearTabs');
+  const years=["ALL",...getYears()];
+  wrap.innerHTML=years.map(y=>`
+    <button class="year-tab${y==="ALL"?' all':''}${y===activeYear?' active':''}" data-y="${y}">
+      ${y==="ALL"?"All years":"20"+y}
+    </button>`).join('');
+  wrap.querySelectorAll('.year-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      activeYear=btn.dataset.y;
+      active="ALL";
+      wrap.querySelectorAll('.year-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      buildMonthTabs();
+      renderAll("ALL");
+    });
+  });
+}
+
+// ── MONTH TABS ──
+function buildMonthTabs(){
+  const wrap=document.getElementById('monthTabs');
+  const months=getMonthsForYear(activeYear);
+  const all=[{key:"ALL",label:"All months",isGs:false},...months.map(m=>({key:m,label:m,isGs:RAW[m]&&RAW[m].source==='gs'}))];
+  wrap.innerHTML=all.map(({key,label,isGs})=>`
+    <button class="tab${isGs?' gs':''}${key===active?' active':''}" data-m="${key}">
+      ${label}${isGs?' ◆':''}
+    </button>`).join('');
+  wrap.querySelectorAll('.tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      active=btn.dataset.m;
+      wrap.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       renderAll(active);
     });
   });
 }
 
-buildTabs();
-renderAll('ALL');
+// ── ADD / EDIT MODAL ──
+function openAddModal(editMonth=null){
+  editingMonth=editMonth;
+  document.getElementById('modalTitle').textContent=editMonth?`Edit — ${editMonth}`:'Add new month';
+  document.getElementById('inputMonth').value=editMonth||'';
+  document.getElementById('inputMonth').disabled=!!editMonth;
+  document.getElementById('inputSource').value=editMonth?RAW[editMonth].source:'xl';
+  document.getElementById('inputXlTotal').value=editMonth&&RAW[editMonth].xlTotal?RAW[editMonth].xlTotal:'';
+  const entries=document.getElementById('protoEntries');
+  entries.innerHTML='';
+  const initRows=editMonth?RAW[editMonth].rows:[{p:'',v:0,qty:'',token:'',investUsd:''}];
+  const merged={};initRows.forEach(r=>{if(!merged[r.p])merged[r.p]={v:0,qty:r.qty,token:r.token,investUsd:r.investUsd||0};merged[r.p].v+=r.v;if(r.investUsd)merged[r.p].investUsd+=r.investUsd;});
+  Object.entries(merged).forEach(([p,d])=>addProtoRow(p,d.v,d.qty,d.token,d.investUsd));
+  toggleConflictGroup();updateTotalPreview();
+  document.getElementById('addOverlay').classList.add('open');
+}
+function closeAddModal(){document.getElementById('addOverlay').classList.remove('open');editingMonth=null;}
+function toggleConflictGroup(){document.getElementById('conflictGroup').style.display=document.getElementById('inputSource').value==='gs'?'block':'none';}
+document.getElementById('inputSource').addEventListener('change',toggleConflictGroup);
+
+function addProtoRow(name='',returnVal=0,qty='',token='',investUsd=''){
+  const list=document.getElementById('protoEntries');
+  const div=document.createElement('div');div.className='proto-entry-card';
+  div.innerHTML=`
+    <button class="remove-entry-btn" onclick="this.parentElement.remove();updateTotalPreview()">×</button>
+    <div class="proto-entry-grid" style="margin-bottom:8px">
+      <div><div class="proto-entry-label">Protocol name</div><input class="form-input proto-name-in" placeholder="e.g. Kamino" value="${name}"/></div>
+      <div><div class="proto-entry-label">Monthly return ($)</div><input class="form-input proto-ret-in" type="number" step="0.01" placeholder="e.g. 350" value="${returnVal}"/></div>
+    </div>
+    <div class="proto-entry-grid-3">
+      <div><div class="proto-entry-label">Token amount</div><input class="form-input proto-qty-in" placeholder="e.g. 1732" value="${qty||''}"/></div>
+      <div><div class="proto-entry-label">Token symbol</div><input class="form-input proto-tok-in" placeholder="e.g. JLP" value="${token||''}"/></div>
+      <div><div class="proto-entry-label">Invested ($)</div><input class="form-input proto-inv-in" type="number" step="1" placeholder="e.g. 9387" value="${investUsd||''}"/></div>
+    </div>`;
+  div.querySelector('.proto-ret-in').addEventListener('input',updateTotalPreview);
+  list.appendChild(div);
+}
+function updateTotalPreview(){
+  let total=0;document.querySelectorAll('.proto-ret-in').forEach(i=>{total+=parseFloat(i.value)||0;});
+  const el=document.getElementById('totalPreview');el.textContent=fmt(total);el.className='total-num '+(total>=0?'pos':'neg');
+}
+function saveMonth(){
+  const monthName=(document.getElementById('inputMonth').value||'').trim().toUpperCase();
+  const source=document.getElementById('inputSource').value;
+  const xlTotal=parseFloat(document.getElementById('inputXlTotal').value)||null;
+  if(!monthName){showToast('Please enter a month name','error');return;}
+  const rows=[];let total=0;
+  document.querySelectorAll('.proto-entry-card').forEach(card=>{
+    const p=card.querySelector('.proto-name-in').value.trim();
+    const v=parseFloat(card.querySelector('.proto-ret-in').value)||0;
+    const qty=card.querySelector('.proto-qty-in').value.trim();
+    const token=card.querySelector('.proto-tok-in').value.trim();
+    const investUsd=parseFloat(card.querySelector('.proto-inv-in').value)||0;
+    if(p){rows.push({p,v,qty:qty||null,token:token||null,investUsd});total+=v;}
+  });
+  if(rows.length===0){showToast('Add at least one protocol','error');return;}
+  const conflict=source==='gs'&&xlTotal!==null&&!isNaN(xlTotal);
+  RAW[monthName]={total:Math.round(total*100)/100,source,rows,...(conflict?{xlTotal,conflict:true}:{})};
+  saveData();buildYearTabs();buildMonthTabs();active=monthName;
+  // auto-switch year to the new month's year
+  activeYear=getYear(monthName);
+  buildYearTabs();buildMonthTabs();
+  renderAll(active);
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.m===active));
+  closeAddModal();showToast(`${monthName} ${editingMonth?'updated':'added'} ✓`,'success');
+}
+
+// ── MANAGE MODAL ──
+function openManageModal(){
+  document.getElementById('manageList').innerHTML=getMonths().map(m=>{
+    const d=RAW[m];
+    return `<div class="month-manage-row">
+      <span class="month-manage-name">${m}</span>
+      <span class="month-manage-total ${d.total>=0?'pos':'neg'}">${fmt(d.total)}</span>
+      <span class="src-badge ${d.source==='gs'?'src-gs':'src-xl'}">${d.source==='gs'?'◆ Sheets':'▪ Excel'}</span>
+      <button class="btn" style="padding:4px 10px;font-size:11px" onclick="closeManageModal();openAddModal('${m}')">Edit</button>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteMonth('${m}')">Delete</button>
+    </div>`;
+  }).join('');
+  document.getElementById('manageOverlay').classList.add('open');
+}
+function closeManageModal(){document.getElementById('manageOverlay').classList.remove('open');}
+function deleteMonth(month){
+  if(!confirm(`Delete ${month}?`))return;
+  delete RAW[month];if(active===month)active='ALL';
+  saveData();buildYearTabs();buildMonthTabs();renderAll(active);openManageModal();
+  showToast(`${month} deleted`,'success');
+}
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(RAW,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='crypto_returns.json';a.click();
+  showToast('JSON exported ✓','success');
+}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+document.getElementById('addOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAddModal();});
+document.getElementById('manageOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeManageModal();});
+
+loadData();buildYearTabs();buildMonthTabs();renderAll('ALL');
 </script>
 </body>
 </html>
