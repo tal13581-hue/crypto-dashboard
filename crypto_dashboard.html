@@ -50,20 +50,29 @@ main { max-width:1280px; margin:0 auto; padding:28px 32px 80px; }
 .kpi-sub { font-size:11px; color:var(--muted); margin-top:3px; font-family:var(--font-mono); }
 .pos { color:var(--green); } .neg { color:var(--red); } .neu { color:var(--text); }
 
-/* YEAR + MONTH TABS */
-.year-tabs { display:flex; gap:6px; margin-bottom:12px; }
-.year-tab { padding:6px 20px; border:1px solid var(--border2); border-radius:8px; font-size:13px; font-family:var(--font-mono); font-weight:500; cursor:pointer; background:transparent; color:var(--muted); transition:all .15s; }
-.year-tab:hover { color:var(--text); border-color:var(--border3); }
-.year-tab.active { background:var(--accent); color:#000; border-color:var(--accent); }
-.year-tab.all { }
+/* NAV BAR — year dropdowns */
+.nav-bar { display:flex; align-items:center; gap:4px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.nav-item { position:relative; }
+.nav-btn { padding:7px 18px; border:1px solid var(--border); border-radius:8px; font-size:13px; font-family:var(--font-mono); font-weight:500; cursor:pointer; background:transparent; color:var(--muted); transition:all .15s; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+.nav-btn:hover { color:var(--text); border-color:var(--border2); background:var(--bg3); }
+.nav-btn.active { background:var(--accent); color:#000; border-color:var(--accent); }
+.nav-btn.active:hover { background:#d97706; }
+.nav-btn .caret { font-size:9px; opacity:0.6; transition:transform .15s; }
+.nav-item:hover .caret { transform:rotate(180deg); }
 
-.month-tabs-wrap { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border); min-height:44px; }
-.tab { padding:5px 13px; border:1px solid var(--border); border-radius:6px; font-size:12px; font-family:var(--font-mono); cursor:pointer; background:transparent; color:var(--muted); transition:all .15s; }
-.tab:hover { border-color:var(--border2); color:var(--text); }
-.tab.active { background:var(--text); color:var(--bg); border-color:var(--text); }
-.tab.gs { border-color:#1d4ed855; color:var(--blue); }
-.tab.gs:hover { border-color:var(--blue); }
-.tab.gs.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+/* active month pill shown in nav */
+.nav-active-month { font-size:11px; font-family:var(--font-mono); color:var(--muted); padding:5px 12px; border:1px solid var(--border); border-radius:6px; background:var(--bg3); }
+.nav-active-month span { color:var(--text); font-weight:500; }
+
+/* DROPDOWN */
+.nav-dropdown { position:absolute; top:calc(100% + 6px); left:0; background:var(--bg2); border:1px solid var(--border2); border-radius:10px; padding:6px; min-width:140px; z-index:50; opacity:0; pointer-events:none; transform:translateY(-4px); transition:all .15s; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+.nav-item:hover .nav-dropdown { opacity:1; pointer-events:all; transform:translateY(0); }
+.drop-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; border-radius:6px; font-size:12px; font-family:var(--font-mono); cursor:pointer; color:var(--muted); transition:all .12s; white-space:nowrap; }
+.drop-item:hover { background:var(--bg3); color:var(--text); }
+.drop-item.active { background:var(--text); color:var(--bg); }
+.drop-item.gs { color:var(--blue); }
+.drop-item.gs.active { background:var(--blue); color:#fff; }
+.drop-gs-dot { font-size:9px; opacity:0.7; }
 
 .conflict-bar { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:8px; padding:10px 16px; margin-bottom:18px; font-size:12px; font-family:var(--font-mono); display:none; align-items:center; gap:12px; flex-wrap:wrap; }
 .conflict-bar.show { display:flex; }
@@ -135,6 +144,26 @@ main { max-width:1280px; margin:0 auto; padding:28px 32px 80px; }
 .toast.error   { border-color:rgba(239,68,68,0.5); }
 
 footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; font-size:11px; font-family:var(--font-mono); color:var(--muted2); flex-wrap:wrap; gap:8px; }
+
+/* ── SMART ENTRY MODAL ── */
+.entry-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:8px; }
+.entry-grid-5 { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 28px; gap:8px; align-items:end; }
+.calc-preview { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin:14px 0; }
+.calc-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:12px; font-family:var(--font-mono); border-bottom:1px solid var(--border); }
+.calc-row:last-child { border-bottom:none; font-weight:600; font-size:13px; padding-top:8px; }
+.calc-label { color:var(--muted); }
+.calc-value { }
+.entry-month-header { display:flex; gap:12px; margin-bottom:16px; }
+.entry-section-title { font-size:10px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:14px 0 8px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+.proto-row-entry { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; position:relative; }
+.proto-row-inline { display:grid; grid-template-columns:1.8fr 1fr 1fr 1fr 28px; gap:8px; align-items:end; }
+.proto-row-calcs { display:flex; gap:16px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); flex-wrap:wrap; }
+.calc-chip { font-size:10px; font-family:var(--font-mono); color:var(--muted); }
+.calc-chip span { color:var(--text); font-weight:500; }
+.month-totals { background:var(--bg4); border:1px solid var(--border2); border-radius:8px; padding:12px 16px; margin:12px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.month-total-item { text-align:center; }
+.month-total-label { font-size:9px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:4px; }
+.month-total-val { font-size:16px; font-family:var(--font-mono); font-weight:600; }
 </style>
 </head>
 <body>
@@ -148,17 +177,15 @@ footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; al
     <div class="source-pill"><span class="dot dot-green"></span>Excel</div>
     <div class="source-pill"><span class="dot dot-blue"></span>Google Sheets</div>
     <button class="btn" onclick="openManageModal()">⚙ Manage</button>
-    <button class="btn btn-accent" onclick="openAddModal()">+ Add month</button>
+    <button class="btn btn-accent" onclick="openEntryModal()">+ New month data</button>
   </div>
 </header>
 
 <main>
   <div class="kpi-grid" id="kpiGrid"></div>
 
-  <!-- Year tabs -->
-  <div class="year-tabs" id="yearTabs"></div>
-  <!-- Month tabs -->
-  <div class="month-tabs-wrap" id="monthTabs"></div>
+  <!-- Nav bar with year dropdowns -->
+  <div class="nav-bar" id="navBar"></div>
 
   <div class="conflict-bar" id="conflictBar">
     <span class="conflict-tag">⚠ Conflict</span>
@@ -245,6 +272,73 @@ footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; al
     <div class="modal-footer">
       <button class="btn" onclick="exportJSON()">↓ Export JSON</button>
       <button class="btn" onclick="closeManageModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── SMART ENTRY MODAL ── -->
+<div class="overlay" id="entryOverlay">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <span class="modal-title">Enter monthly data</span>
+      <button class="modal-close" onclick="closeEntryModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Month + Source -->
+      <div class="entry-month-header">
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <label class="form-label">Month name</label>
+          <input class="form-input" id="entryMonth" placeholder="e.g. FEB 26" oninput="updateEntryMonth(this.value)"/>
+        </div>
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <label class="form-label">Source</label>
+          <select class="form-select" id="entrySource">
+            <option value="xl">Excel</option>
+            <option value="gs">Google Sheets</option>
+          </select>
+        </div>
+        <div class="form-group" id="entryConflictGroup" style="flex:1;margin-bottom:0;display:none">
+          <label class="form-label">Excel total ($)</label>
+          <input class="form-input" id="entryXlTotal" type="number" placeholder="e.g. 977"/>
+        </div>
+      </div>
+      <div id="entrySource" style="display:none"></div>
+
+      <div class="entry-section-title">Protocol rows — enter raw data, dashboard calculates the rest</div>
+
+      <!-- Column headers -->
+      <div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr 28px;gap:8px;padding:0 0 4px;margin-bottom:2px">
+        <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Protocol</div>
+        <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Token amount</div>
+        <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Token symbol</div>
+        <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Token price ($)</div>
+        <div></div>
+      </div>
+      <div id="entryRows"></div>
+      <button class="add-proto-btn" onclick="addEntryRow()">+ Add protocol</button>
+
+      <!-- Live totals -->
+      <div class="month-totals" id="entryTotals">
+        <div class="month-total-item">
+          <div class="month-total-label">Total invested</div>
+          <div class="month-total-val neu" id="totalInvestedPreview">$0</div>
+        </div>
+        <div class="month-total-item">
+          <div class="month-total-label">Total return</div>
+          <div class="month-total-val neu" id="totalReturnPreview">$0</div>
+        </div>
+        <div class="month-total-item">
+          <div class="month-total-label">Portfolio APR</div>
+          <div class="month-total-val neu" id="totalAPRPreview">—</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEntryModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="saveEntryMonth()">Save month</button>
     </div>
   </div>
 </div>
@@ -443,44 +537,29 @@ function renderAll(month){
   renderKPI(month);renderConflict(month);renderBar(month);renderProtoTable(month);renderLegend(month);
 }
 
-// ── YEAR TABS ──
-function buildYearTabs(){
-  const wrap=document.getElementById('yearTabs');
-  const years=["ALL",...getYears()];
-  wrap.innerHTML=years.map(y=>`
-    <button class="year-tab${y==="ALL"?' all':''}${y===activeYear?' active':''}" data-y="${y}">
-      ${y==="ALL"?"All years":"20"+y}
-    </button>`).join('');
-  wrap.querySelectorAll('.year-tab').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      activeYear=btn.dataset.y;
-      active="ALL";
-      wrap.querySelectorAll('.year-tab').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      buildMonthTabs();
-      renderAll("ALL");
-    });
+// ── NAV BAR (year dropdowns) ──
+function buildNav(){
+  const wrap=document.getElementById('navBar');
+  const years=getYears();
+  let html=`<div class="nav-item"><button class="nav-btn${active==="ALL"&&activeYear==="ALL"?" active":""}" onclick="selectAll()">All</button></div>`;
+  years.forEach(yr=>{
+    const months=getMonthsForYear(yr);
+    const yearActive=activeYear===yr;
+    const dropItems=months.map(m=>{
+      const isGs=RAW[m]&&RAW[m].source==="gs";
+      const isCur=active===m;
+      return `<div class="drop-item${isGs?" gs":""}${isCur?" active":""}" onclick="selectMonth('${m}','${yr}')">${m}${isGs?" <span class=drop-gs-dot>◆</span>":""}</div>`;
+    }).join("");
+    html+=`<div class="nav-item"><button class="nav-btn${yearActive?" active":""}">20${yr} <span class="caret">▼</span></button><div class="nav-dropdown">${dropItems}</div></div>`;
   });
+  if(active!=="ALL"){
+    const isGs=RAW[active]&&RAW[active].source==="gs";
+    html+=`<div class="nav-active-month">Viewing: <span>${active}${isGs?" ◆":""}</span></div>`;
+  }
+  wrap.innerHTML=html;
 }
-
-// ── MONTH TABS ──
-function buildMonthTabs(){
-  const wrap=document.getElementById('monthTabs');
-  const months=getMonthsForYear(activeYear);
-  const all=[{key:"ALL",label:"All months",isGs:false},...months.map(m=>({key:m,label:m,isGs:RAW[m]&&RAW[m].source==='gs'}))];
-  wrap.innerHTML=all.map(({key,label,isGs})=>`
-    <button class="tab${isGs?' gs':''}${key===active?' active':''}" data-m="${key}">
-      ${label}${isGs?' ◆':''}
-    </button>`).join('');
-  wrap.querySelectorAll('.tab').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      active=btn.dataset.m;
-      wrap.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      renderAll(active);
-    });
-  });
-}
+function selectAll(){ active="ALL"; activeYear="ALL"; buildNav(); renderAll("ALL"); }
+function selectMonth(month,yr){ active=month; activeYear=yr; buildNav(); renderAll(month); }
 
 // ── ADD / EDIT MODAL ──
 function openAddModal(editMonth=null){
@@ -540,12 +619,8 @@ function saveMonth(){
   if(rows.length===0){showToast('Add at least one protocol','error');return;}
   const conflict=source==='gs'&&xlTotal!==null&&!isNaN(xlTotal);
   RAW[monthName]={total:Math.round(total*100)/100,source,rows,...(conflict?{xlTotal,conflict:true}:{})};
-  saveData();buildYearTabs();buildMonthTabs();active=monthName;
-  // auto-switch year to the new month's year
-  activeYear=getYear(monthName);
-  buildYearTabs();buildMonthTabs();
-  renderAll(active);
-  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.m===active));
+  activeYear=getYear(monthName);active=monthName;
+  saveData();buildNav();renderAll(active);
   closeAddModal();showToast(`${monthName} ${editingMonth?'updated':'added'} ✓`,'success');
 }
 
@@ -567,7 +642,7 @@ function closeManageModal(){document.getElementById('manageOverlay').classList.r
 function deleteMonth(month){
   if(!confirm(`Delete ${month}?`))return;
   delete RAW[month];if(active===month)active='ALL';
-  saveData();buildYearTabs();buildMonthTabs();renderAll(active);openManageModal();
+  saveData();buildNav();renderAll(active);openManageModal();
   showToast(`${month} deleted`,'success');
 }
 function exportJSON(){
@@ -582,7 +657,154 @@ function showToast(msg,type='success'){
 document.getElementById('addOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAddModal();});
 document.getElementById('manageOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeManageModal();});
 
-loadData();buildYearTabs();buildMonthTabs();renderAll('ALL');
+
+// ── SMART ENTRY MODAL ──
+let entryRowCount = 0;
+
+function openEntryModal(){
+  entryRowCount = 0;
+  document.getElementById('entryMonth').value = '';
+  document.getElementById('entrySource').value = 'xl';
+  document.getElementById('entryXlTotal').value = '';
+  document.getElementById('entryConflictGroup').style.display = 'none';
+  document.getElementById('entryRows').innerHTML = '';
+  addEntryRow(); // start with one row
+  updateEntryTotals();
+  document.getElementById('entryOverlay').classList.add('open');
+}
+function closeEntryModal(){ document.getElementById('entryOverlay').classList.remove('open'); }
+
+document.getElementById('entryOverlay').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeEntryModal(); });
+
+// source select in entry modal — different id from main modal
+document.addEventListener('change', e=>{
+  if(e.target && e.target.id === 'entrySourceSelect'){
+    document.getElementById('entryConflictGroup').style.display = e.target.value === 'gs' ? 'block' : 'none';
+  }
+});
+
+function addEntryRow(name='', qty='', token='', price='', added=''){
+  const id = ++entryRowCount;
+  const div = document.createElement('div');
+  div.className = 'proto-row-entry';
+  div.id = 'entryRow_' + id;
+  div.innerHTML = `
+    <button class="remove-entry-btn" onclick="document.getElementById('entryRow_${id}').remove();updateEntryTotals()">×</button>
+    <div class="proto-row-inline">
+      <div>
+        <div class="proto-entry-label">Protocol name</div>
+        <input class="form-input er-name" placeholder="e.g. Kamino" value="${name}" oninput="updateEntryTotals()"/>
+      </div>
+      <div>
+        <div class="proto-entry-label">Token amount</div>
+        <input class="form-input er-qty" type="number" step="any" placeholder="e.g. 1732" value="${qty}" oninput="updateEntryTotals()"/>
+      </div>
+      <div>
+        <div class="proto-entry-label">Symbol</div>
+        <input class="form-input er-token" placeholder="e.g. JLP" value="${token}" oninput="updateEntryTotals()"/>
+      </div>
+      <div>
+        <div class="proto-entry-label">Price ($)</div>
+        <input class="form-input er-price" type="number" step="any" placeholder="e.g. 4.72" value="${price}" oninput="updateEntryTotals()"/>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="proto-entry-label">Tokens added this month (rewards/new deposits)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+        <input class="form-input er-added" type="number" step="any" placeholder="e.g. 53 (tokens added)" value="${added}" oninput="updateEntryTotals()"/>
+        <div class="proto-row-calcs" id="calcs_${id}" style="margin:0;padding:0;border:none;align-items:center"></div>
+      </div>
+    </div>`;
+  document.getElementById('entryRows').appendChild(div);
+}
+
+function getEntryRows(){
+  return [...document.querySelectorAll('.proto-row-entry')].map(div => ({
+    name:  div.querySelector('.er-name')?.value.trim() || '',
+    qty:   parseFloat(div.querySelector('.er-qty')?.value) || 0,
+    token: div.querySelector('.er-token')?.value.trim() || '',
+    price: parseFloat(div.querySelector('.er-price')?.value) || 0,
+    added: parseFloat(div.querySelector('.er-added')?.value) || 0,
+    id:    div.id.split('_')[1]
+  }));
+}
+
+function updateEntryTotals(){
+  const rows = getEntryRows();
+  let totalInvest = 0, totalReturn = 0;
+
+  rows.forEach(r => {
+    const invest = r.qty * r.price;
+    const ret    = r.added * r.price;
+    totalInvest += invest;
+    totalReturn += ret;
+
+    // update per-row calcs
+    const calcsEl = document.getElementById('calcs_' + r.id);
+    if(calcsEl){
+      const apr = invest > 0 ? ((ret * 12) / invest * 100) : null;
+      calcsEl.innerHTML = `
+        <div class="calc-chip">Invested: <span>${r.qty && r.price ? fmt(invest) : '—'}</span></div>
+        <div class="calc-chip">Return: <span class="${ret>=0?'pos':'neg'}">${r.price && r.added !== 0 ? fmt(ret) : '—'}</span></div>
+        <div class="calc-chip">APR: <span class="${apr!=null&&apr>=0?'pos':'neg'}">${apr !== null && r.price ? fmtPct(apr) : '—'}</span></div>`;
+    }
+  });
+
+  const portfolioAPR = totalInvest > 0 ? ((totalReturn * 12) / totalInvest * 100) : null;
+
+  const invEl = document.getElementById('totalInvestedPreview');
+  const retEl = document.getElementById('totalReturnPreview');
+  const aprEl = document.getElementById('totalAPRPreview');
+
+  invEl.textContent = fmt(totalInvest);
+  invEl.className = 'month-total-val neu';
+  retEl.textContent = fmt(totalReturn);
+  retEl.className = 'month-total-val ' + (totalReturn >= 0 ? 'pos' : 'neg');
+  aprEl.textContent = portfolioAPR !== null ? fmtPct(portfolioAPR) : '—';
+  aprEl.className = 'month-total-val ' + (portfolioAPR !== null ? (portfolioAPR >= 0 ? 'pos' : 'neg') : 'neu');
+}
+
+function saveEntryMonth(){
+  const monthName = (document.getElementById('entryMonth').value || '').trim().toUpperCase();
+  const sourceEl  = document.querySelector('#entryOverlay .form-select');
+  const source    = sourceEl ? sourceEl.value : 'xl';
+  const xlTotal   = parseFloat(document.getElementById('entryXlTotal').value) || null;
+
+  if(!monthName){ showToast('Please enter a month name', 'error'); return; }
+
+  const rows = getEntryRows();
+  const validRows = rows.filter(r => r.name && r.price > 0);
+  if(validRows.length === 0){ showToast('Add at least one protocol with a price', 'error'); return; }
+
+  // Build RAW rows from smart entry
+  const rawRows = validRows.map(r => ({
+    p:         r.name,
+    v:         Math.round(r.added * r.price * 100) / 100,  // monthly return in $
+    qty:       r.qty || null,
+    token:     r.token || null,
+    investUsd: Math.round(r.qty * r.price * 100) / 100
+  }));
+
+  const total = rawRows.reduce((s, r) => s + r.v, 0);
+  const conflict = source === 'gs' && xlTotal !== null && !isNaN(xlTotal);
+
+  RAW[monthName] = {
+    total: Math.round(total * 100) / 100,
+    source,
+    rows: rawRows,
+    ...(conflict ? { xlTotal, conflict: true } : {})
+  };
+
+  saveData();
+  activeYear = getYear(monthName);
+  active = monthName;
+  buildNav();
+  renderAll(active);
+  closeEntryModal();
+  showToast(`${monthName} saved — invested ${fmt(rawRows.reduce((s,r)=>s+(r.investUsd||0),0))}, return ${fmt(total)} ✓`, 'success');
+}
+
+loadData();buildNav();renderAll('ALL');
 </script>
 </body>
 </html>
