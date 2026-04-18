@@ -709,9 +709,9 @@ function addEntryRow(name='', qty='', token='', price='', added=''){
       </div>
     </div>
     <div style="margin-top:10px">
-      <div class="proto-entry-label">Tokens added this month (rewards/new deposits)</div>
+      <div class="proto-entry-label">Value last month ($)</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-        <input class="form-input er-added" type="number" step="any" placeholder="e.g. 53 (tokens added)" value="${added}" oninput="updateEntryTotals()"/>
+        <input class="form-input er-added" type="number" step="any" placeholder="e.g. 8500 (last month $)" value="${added}" oninput="updateEntryTotals()"/>
         <div class="proto-row-calcs" id="calcs_${id}" style="margin:0;padding:0;border:none;align-items:center"></div>
       </div>
     </div>`;
@@ -734,8 +734,9 @@ function updateEntryTotals(){
   let totalInvest = 0, totalReturn = 0;
 
   rows.forEach(r => {
-    const invest = r.qty * r.price;
-    const ret    = r.added * r.price;
+    const invest   = r.qty * r.price;           // current value
+    const lastMonth = r.added;                  // value last month (user input)
+    const ret      = invest - lastMonth;         // profit = current - last month
     totalInvest += invest;
     totalReturn += ret;
 
@@ -744,9 +745,9 @@ function updateEntryTotals(){
     if(calcsEl){
       const apr = invest > 0 ? ((ret * 12) / invest * 100) : null;
       calcsEl.innerHTML = `
-        <div class="calc-chip">Invested: <span>${r.qty && r.price ? fmt(invest) : '—'}</span></div>
-        <div class="calc-chip">Return: <span class="${ret>=0?'pos':'neg'}">${r.price && r.added !== 0 ? fmt(ret) : '—'}</span></div>
-        <div class="calc-chip">APR: <span class="${apr!=null&&apr>=0?'pos':'neg'}">${apr !== null && r.price ? fmtPct(apr) : '—'}</span></div>`;
+        <div class="calc-chip">Current value: <span>${r.qty && r.price ? fmt(invest) : '—'}</span></div>
+        <div class="calc-chip">Profit: <span class="${ret>=0?'pos':'neg'}">${r.price && r.added > 0 ? fmt(ret) : '—'}</span></div>
+        <div class="calc-chip">APR: <span class="${apr!=null&&apr>=0?'pos':'neg'}">${apr !== null && r.price && r.added > 0 ? fmtPct(apr) : '—'}</span></div>`;
     }
   });
 
@@ -779,7 +780,7 @@ function saveEntryMonth(){
   // Build RAW rows from smart entry
   const rawRows = validRows.map(r => ({
     p:         r.name,
-    v:         Math.round(r.added * r.price * 100) / 100,  // monthly return in $
+    v:         Math.round((r.qty * r.price - r.added) * 100) / 100,  // return = current - last month
     qty:       r.qty || null,
     token:     r.token || null,
     investUsd: Math.round(r.qty * r.price * 100) / 100
