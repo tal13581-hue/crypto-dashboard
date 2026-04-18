@@ -218,46 +218,6 @@ footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; al
   </div>
 </footer>
 
-<!-- ADD / EDIT MODAL -->
-<div class="overlay" id="addOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="modalTitle">Add new month</span>
-      <button class="modal-close" onclick="closeAddModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row-2">
-        <div class="form-group">
-          <label class="form-label">Month name</label>
-          <input class="form-input" id="inputMonth" placeholder="e.g. FEB 26" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Source</label>
-          <select class="form-select" id="inputSource">
-            <option value="xl">Excel</option>
-            <option value="gs">Google Sheets</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group" id="conflictGroup" style="display:none">
-        <label class="form-label">Excel total ($) — for conflict display</label>
-        <input class="form-input" id="inputXlTotal" type="number" placeholder="e.g. 977" />
-      </div>
-      <div class="proto-section-title">Protocols — investment & returns</div>
-      <div class="proto-entries" id="protoEntries"></div>
-      <button class="add-proto-btn" onclick="addProtoRow()">+ Add protocol</button>
-      <div class="total-preview">
-        <span class="total-label">Calculated monthly total</span>
-        <span class="total-num neu" id="totalPreview">$0</span>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeAddModal()">Cancel</button>
-      <button class="btn btn-accent" onclick="saveMonth()">Save month</button>
-    </div>
-  </div>
-</div>
-
 <!-- MANAGE MODAL -->
 <div class="overlay" id="manageOverlay">
   <div class="modal">
@@ -561,69 +521,6 @@ function buildNav(){
 function selectAll(){ active="ALL"; activeYear="ALL"; buildNav(); renderAll("ALL"); }
 function selectMonth(month,yr){ active=month; activeYear=yr; buildNav(); renderAll(month); }
 
-// ── ADD / EDIT MODAL ──
-function openAddModal(editMonth=null){
-  editingMonth=editMonth;
-  document.getElementById('modalTitle').textContent=editMonth?`Edit — ${editMonth}`:'Add new month';
-  document.getElementById('inputMonth').value=editMonth||'';
-  document.getElementById('inputMonth').disabled=!!editMonth;
-  document.getElementById('inputSource').value=editMonth?RAW[editMonth].source:'xl';
-  document.getElementById('inputXlTotal').value=editMonth&&RAW[editMonth].xlTotal?RAW[editMonth].xlTotal:'';
-  const entries=document.getElementById('protoEntries');
-  entries.innerHTML='';
-  const initRows=editMonth?RAW[editMonth].rows:[{p:'',v:0,qty:'',token:'',investUsd:''}];
-  const merged={};initRows.forEach(r=>{if(!merged[r.p])merged[r.p]={v:0,qty:r.qty,token:r.token,investUsd:r.investUsd||0};merged[r.p].v+=r.v;if(r.investUsd)merged[r.p].investUsd+=r.investUsd;});
-  Object.entries(merged).forEach(([p,d])=>addProtoRow(p,d.v,d.qty,d.token,d.investUsd));
-  toggleConflictGroup();updateTotalPreview();
-  document.getElementById('addOverlay').classList.add('open');
-}
-function closeAddModal(){document.getElementById('addOverlay').classList.remove('open');editingMonth=null;}
-function toggleConflictGroup(){document.getElementById('conflictGroup').style.display=document.getElementById('inputSource').value==='gs'?'block':'none';}
-document.getElementById('inputSource').addEventListener('change',toggleConflictGroup);
-
-function addProtoRow(name='',returnVal=0,qty='',token='',investUsd=''){
-  const list=document.getElementById('protoEntries');
-  const div=document.createElement('div');div.className='proto-entry-card';
-  div.innerHTML=`
-    <button class="remove-entry-btn" onclick="this.parentElement.remove();updateTotalPreview()">×</button>
-    <div class="proto-entry-grid" style="margin-bottom:8px">
-      <div><div class="proto-entry-label">Protocol name</div><input class="form-input proto-name-in" placeholder="e.g. Kamino" value="${name}"/></div>
-      <div><div class="proto-entry-label">Monthly return ($)</div><input class="form-input proto-ret-in" type="number" step="0.01" placeholder="e.g. 350" value="${returnVal}"/></div>
-    </div>
-    <div class="proto-entry-grid-3">
-      <div><div class="proto-entry-label">Token amount</div><input class="form-input proto-qty-in" placeholder="e.g. 1732" value="${qty||''}"/></div>
-      <div><div class="proto-entry-label">Token symbol</div><input class="form-input proto-tok-in" placeholder="e.g. JLP" value="${token||''}"/></div>
-      <div><div class="proto-entry-label">Invested ($)</div><input class="form-input proto-inv-in" type="number" step="1" placeholder="e.g. 9387" value="${investUsd||''}"/></div>
-    </div>`;
-  div.querySelector('.proto-ret-in').addEventListener('input',updateTotalPreview);
-  list.appendChild(div);
-}
-function updateTotalPreview(){
-  let total=0;document.querySelectorAll('.proto-ret-in').forEach(i=>{total+=parseFloat(i.value)||0;});
-  const el=document.getElementById('totalPreview');el.textContent=fmt(total);el.className='total-num '+(total>=0?'pos':'neg');
-}
-function saveMonth(){
-  const monthName=(document.getElementById('inputMonth').value||'').trim().toUpperCase();
-  const source=document.getElementById('inputSource').value;
-  const xlTotal=parseFloat(document.getElementById('inputXlTotal').value)||null;
-  if(!monthName){showToast('Please enter a month name','error');return;}
-  const rows=[];let total=0;
-  document.querySelectorAll('.proto-entry-card').forEach(card=>{
-    const p=card.querySelector('.proto-name-in').value.trim();
-    const v=parseFloat(card.querySelector('.proto-ret-in').value)||0;
-    const qty=card.querySelector('.proto-qty-in').value.trim();
-    const token=card.querySelector('.proto-tok-in').value.trim();
-    const investUsd=parseFloat(card.querySelector('.proto-inv-in').value)||0;
-    if(p){rows.push({p,v,qty:qty||null,token:token||null,investUsd});total+=v;}
-  });
-  if(rows.length===0){showToast('Add at least one protocol','error');return;}
-  const conflict=source==='gs'&&xlTotal!==null&&!isNaN(xlTotal);
-  RAW[monthName]={total:Math.round(total*100)/100,source,rows,...(conflict?{xlTotal,conflict:true}:{})};
-  activeYear=getYear(monthName);active=monthName;
-  saveData();buildNav();renderAll(active);
-  closeAddModal();showToast(`${monthName} ${editingMonth?'updated':'added'} ✓`,'success');
-}
-
 // ── MANAGE MODAL ──
 function openManageModal(){
   document.getElementById('manageList').innerHTML=getMonths().map(m=>{
@@ -632,7 +529,7 @@ function openManageModal(){
       <span class="month-manage-name">${m}</span>
       <span class="month-manage-total ${d.total>=0?'pos':'neg'}">${fmt(d.total)}</span>
       <span class="src-badge ${d.source==='gs'?'src-gs':'src-xl'}">${d.source==='gs'?'◆ Sheets':'▪ Excel'}</span>
-      <button class="btn" style="padding:4px 10px;font-size:11px" onclick="closeManageModal();openAddModal('${m}')">Edit</button>
+      <button class="btn" style="padding:4px 10px;font-size:11px" onclick="closeManageModal();openEntryModal('${m}')">Edit</button>
       <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteMonth('${m}')">Delete</button>
     </div>`;
   }).join('');
@@ -661,14 +558,49 @@ document.getElementById('manageOverlay').addEventListener('click',e=>{if(e.targe
 // ── SMART ENTRY MODAL ──
 let entryRowCount = 0;
 
-function openEntryModal(){
+function openEntryModal(editMonth=null){
   entryRowCount = 0;
-  document.getElementById('entryMonth').value = '';
-  document.getElementById('entrySource').value = 'xl';
-  document.getElementById('entryXlTotal').value = '';
-  document.getElementById('entryConflictGroup').style.display = 'none';
+  const monthInput = document.getElementById('entryMonth');
+  const sourceEl   = document.querySelector('#entryOverlay .form-select');
+  const xlInput    = document.getElementById('entryXlTotal');
+
+  monthInput.value    = editMonth || '';
+  monthInput.disabled = !!editMonth;
   document.getElementById('entryRows').innerHTML = '';
-  addEntryRow(); // start with one row
+
+  if(editMonth && RAW[editMonth]){
+    const d = RAW[editMonth];
+    if(sourceEl) sourceEl.value = d.source;
+    xlInput.value = d.xlTotal || '';
+    document.getElementById('entryConflictGroup').style.display = d.source==='gs' ? 'block' : 'none';
+    // Pre-fill rows from saved data
+    // For each saved row we know: p, qty, token, investUsd, v (return)
+    // We back-calculate lastMonthValue = currentValue - return = investUsd - v
+    // (investUsd IS current value since we store qty*price at entry time)
+    const merged = {};
+    d.rows.forEach(r => {
+      if(!merged[r.p]) merged[r.p] = {v:0, qty:r.qty, token:r.token, investUsd:0};
+      merged[r.p].v += r.v;
+      merged[r.p].investUsd += (r.investUsd||0);
+    });
+    Object.entries(merged).forEach(([p, data]) => {
+      // price = investUsd / qty (reconstruct); lastMonth = investUsd - return
+      const qty   = data.qty   || 0;
+      const price = qty > 0 ? (data.investUsd / qty) : 0;
+      const lastMonthVal = data.investUsd - data.v;  // reverse-calc
+      addEntryRow(p, qty, data.token, price > 0 ? price : '', lastMonthVal > 0 ? lastMonthVal : '');
+    });
+  } else {
+    if(sourceEl) sourceEl.value = 'xl';
+    xlInput.value = '';
+    document.getElementById('entryConflictGroup').style.display = 'none';
+    addEntryRow(); // blank row
+  }
+
+  // Update modal title
+  document.querySelector('#entryOverlay .modal-title').textContent =
+    editMonth ? `Edit — ${editMonth}` : 'Enter monthly data';
+
   updateEntryTotals();
   document.getElementById('entryOverlay').classList.add('open');
 }
@@ -766,10 +698,11 @@ function updateEntryTotals(){
 }
 
 function saveEntryMonth(){
-  const monthName = (document.getElementById('entryMonth').value || '').trim().toUpperCase();
-  const sourceEl  = document.querySelector('#entryOverlay .form-select');
-  const source    = sourceEl ? sourceEl.value : 'xl';
-  const xlTotal   = parseFloat(document.getElementById('entryXlTotal').value) || null;
+  const monthName  = (document.getElementById('entryMonth').value || '').trim().toUpperCase();
+  const isEdit     = !!document.getElementById('entryMonth').disabled;
+  const sourceEl   = document.querySelector('#entryOverlay .form-select');
+  const source     = sourceEl ? sourceEl.value : 'xl';
+  const xlTotal    = parseFloat(document.getElementById('entryXlTotal').value) || null;
 
   if(!monthName){ showToast('Please enter a month name', 'error'); return; }
 
@@ -802,7 +735,7 @@ function saveEntryMonth(){
   buildNav();
   renderAll(active);
   closeEntryModal();
-  showToast(`${monthName} saved — invested ${fmt(rawRows.reduce((s,r)=>s+(r.investUsd||0),0))}, return ${fmt(total)} ✓`, 'success');
+  showToast(`${monthName} ${isEdit?'updated':'saved'} — invested ${fmt(rawRows.reduce((s,r)=>s+(r.investUsd||0),0))}, return ${fmt(total)} ✓`, 'success');
 }
 
 loadData();buildNav();renderAll('ALL');
