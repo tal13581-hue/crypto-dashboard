@@ -149,6 +149,20 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
 .picker-month{padding:6px 4px;background:transparent;border:1px solid var(--border);border-radius:6px;font-family:var(--font-mono);font-size:11px;cursor:pointer;color:var(--muted);transition:all .12s;text-align:center}
 .picker-month:hover{border-color:var(--border2);color:var(--text);background:var(--bg4)}
 .picker-month.selected{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+
+.price-card-token{font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+.price-card-val{font-size:22px;font-weight:600;font-family:var(--font-mono);letter-spacing:-0.5px;margin-bottom:4px}
+.price-card-change{font-size:12px;font-family:var(--font-mono)}
+.price-card-name{font-size:10px;color:var(--muted);font-family:var(--font-mono);margin-top:4px}
+
+.mini-chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.mini-chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:border-color .15s}
+.mini-chart-card:hover{border-color:var(--border2)}
+.mini-chart-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.mini-chart-sym{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--text)}
+.mini-chart-chg{font-family:var(--font-mono);font-size:10px}
+.mini-chart-price{font-family:var(--font-mono);font-size:15px;font-weight:600;margin-bottom:4px}
+.mini-chart-name{font-family:var(--font-mono);font-size:9px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -166,6 +180,8 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
 
 <main>
   <div class="kpi-grid" id="kpiGrid"></div>
+  <!-- Mini price charts shown on home screen -->
+  <div id="miniChartsSection" style="margin-bottom:20px"></div>
   <div class="nav-bar" id="navBar"></div>
   <div id="monthSubTabs" style="display:none;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)"></div>
 
@@ -207,6 +223,39 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
       <div id="protoTableWrap" style="overflow-x:auto"></div>
     </div>
   </div>
+
+<!-- ── LIVE PRICES PAGE ── -->
+<div id="pricesPage" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn" onclick="hidePricesPage()">← Back</button>
+      <span style="font-family:var(--font-mono);font-size:13px;color:var(--muted)" id="pricesLastUpdate"></span>
+    </div>
+    <button class="btn" onclick="fetchPrices()" id="refreshBtn">↻ Refresh</button>
+  </div>
+
+  <!-- Price cards grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:28px" id="priceCards">
+    <div class="kpi" style="text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:12px;grid-column:1/-1;padding:28px">
+      Loading live prices...<br>
+      <span style="font-size:10px;margin-top:6px;display:block">Live prices work on GitHub Pages — if running locally, click Refresh</span>
+    </div>
+  </div>
+
+  <!-- Chart area -->
+  <div class="chart-card" id="priceChartCard" style="display:none">
+    <div class="chart-header">
+      <span class="chart-title" id="priceChartTitle">Price chart</span>
+      <div style="display:flex;gap:6px">
+        <button class="sub-tab active" onclick="setPriceRange(7,this)">7D</button>
+        <button class="sub-tab" onclick="setPriceRange(30,this)">30D</button>
+        <button class="sub-tab" onclick="setPriceRange(90,this)">90D</button>
+      </div>
+    </div>
+    <div style="position:relative;height:260px"><canvas id="priceChart"></canvas></div>
+  </div>
+</div>
+
 </main>
 
 <footer>
@@ -747,6 +796,358 @@ function selectPickerMonth(idx){
   const key=MONTH_NAMES[idx]+' '+String(_pickerYear).slice(-2);
   document.getElementById('eMonth').value=key;
   renderPicker();
+}
+
+
+// ═══════════════════════════════════════════════════
+// LIVE PRICES — CoinGecko API
+// ═══════════════════════════════════════════════════
+
+// Map token symbols used in dashboard → CoinGecko coin IDs
+const COIN_MAP = {
+  "TRX":    {id:"tron",                  name:"TRON",          symbol:"TRX"},
+  "JLP":    {id:"jupiter-perpetuals-liquidity-provider-token", name:"JLP", symbol:"JLP"},
+  "PYTH":   {id:"pyth-network",          name:"Pyth Network",  symbol:"PYTH"},
+  "GMX":    {id:"gmx",                   name:"GMX",           symbol:"GMX"},
+  "DOT":    {id:"polkadot",              name:"Polkadot",      symbol:"DOT"},
+  "NEAR":   {id:"near",                  name:"NEAR Protocol", symbol:"NEAR"},
+  "SOL":    {id:"solana",               name:"Solana",        symbol:"SOL"},
+  "AERO":   {id:"aerodrome-finance",    name:"Aerodrome",     symbol:"AERO"},
+  "ETH":    {id:"ethereum",             name:"Ethereum",      symbol:"ETH"},
+  "BTC":    {id:"bitcoin",              name:"Bitcoin",       symbol:"BTC"},
+  "ETH":    {id:"ethereum",             name:"Ethereum",      symbol:"ETH"},
+  "SOL":    {id:"solana",               name:"Solana",        symbol:"SOL"},
+};
+
+// Tokens to always show in prices page (regardless of portfolio)
+const ALWAYS_SHOW = ["BTC","ETH","SOL"];
+
+let priceData = {};
+let priceChartInst = null;
+let selectedCoin = null;
+let selectedDays = 7;
+
+// Collect all unique tokens from RAW data
+function getMyTokens(){
+  const tokens = new Set();
+  Object.values(RAW).forEach(month => {
+    month.rows.forEach(r => { if(r.token) r.token.split('+').forEach(t => tokens.add(t.trim())); });
+  });
+  return [...tokens].filter(t => COIN_MAP[t]);
+}
+
+
+
+async function fetchPrices(){
+  const btn = document.getElementById('refreshBtn');
+  btn.textContent = '↻ Loading...';
+  btn.disabled = true;
+
+  const portfolioTokens = getMyTokens();
+  const allTokens = [...new Set([...ALWAYS_SHOW, ...portfolioTokens])];
+
+  const success = await tryFetchPrices(allTokens);
+  if(success){
+    renderPriceCards(allTokens);
+    document.getElementById('pricesLastUpdate').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } else {
+    document.getElementById('priceCards').innerHTML = `
+      <div class="kpi" style="grid-column:1/-1;text-align:center;padding:28px;font-family:var(--font-mono);font-size:13px">
+        <div style="color:var(--red);margin-bottom:12px">Could not load live prices</div>
+        <div style="color:var(--muted);font-size:11px;line-height:1.8;margin-bottom:16px">
+          Live prices require an internet connection and HTTPS.<br>
+          <strong style="color:var(--text)">Solution:</strong> Upload to GitHub Pages, then prices will work automatically.
+        </div>
+        <button class="btn" onclick="fetchPrices()" style="display:inline-flex;margin:auto">↻ Try again</button>
+      </div>`;
+  }
+
+  btn.textContent = '↻ Refresh';
+  btn.disabled = false;
+}
+
+async function tryFetchPrices(allTokens){
+  const ids = [...new Set(allTokens.map(t => COIN_MAP[t]?.id).filter(Boolean))].join(',');
+
+  // Proxy 1: CoinGecko direct (works on HTTPS / GitHub Pages)
+  try {
+    const res = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_30d_change=true`,
+      {headers:{'Accept':'application/json'}, signal: AbortSignal.timeout(6000)}
+    );
+    if(res.ok){
+      const data = await res.json();
+      if(Object.keys(data).length > 0){ priceData = data; return true; }
+    }
+  } catch(e){}
+
+  // Proxy 2: via allorigins (CORS proxy — works from local files)
+  try {
+    const apiUrl = encodeURIComponent(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_30d_change=true`
+    );
+    const res = await fetch(`https://api.allorigins.win/get?url=${apiUrl}`,
+      {signal: AbortSignal.timeout(8000)}
+    );
+    if(res.ok){
+      const wrapper = await res.json();
+      const data = JSON.parse(wrapper.contents);
+      if(Object.keys(data).length > 0){ priceData = data; return true; }
+    }
+  } catch(e){}
+
+  // Proxy 3: corsproxy.io
+  try {
+    const res = await fetch(
+      `https://corsproxy.io/?url=https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_30d_change=true`,
+      {signal: AbortSignal.timeout(8000)}
+    );
+    if(res.ok){
+      const data = await res.json();
+      if(Object.keys(data).length > 0){ priceData = data; return true; }
+    }
+  } catch(e){}
+
+  return false;
+}
+
+
+
+async function loadCoinChart(coinId, days){
+  if(priceChartInst) priceChartInst.destroy();
+  const canvas = document.getElementById('priceChart');
+  canvas.style.opacity = '0.4';
+
+  try {
+    const apiUrl2 = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`;
+    const proxies2 = [
+      apiUrl2,
+      `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl2)}`,
+      `https://corsproxy.io/?url=${apiUrl2}`,
+    ];
+    let chartData = null;
+    for(const url of proxies2){
+      try{
+        const r = await fetch(url, {signal:AbortSignal.timeout(8000)});
+        if(!r.ok) continue;
+        let raw = await r.json();
+        if(raw.contents) raw = JSON.parse(raw.contents);
+        if(raw.prices){ chartData = raw; break; }
+      } catch(e){ continue; }
+    }
+    if(!chartData) throw new Error('All proxies failed');
+    const prices = chartData.prices; // [[timestamp, price], ...]
+
+    const labels = prices.map(p => {
+      const d = new Date(p[0]);
+      return days <= 7 ? d.toLocaleDateString('en',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',hour12:false})
+                       : d.toLocaleDateString('en',{month:'short',day:'numeric'});
+    });
+    // Reduce label density
+    const step = Math.max(1, Math.floor(labels.length / 40));
+    const sparseLabels = labels.map((l,i) => i % step === 0 ? l : '');
+
+    const vals = prices.map(p => p[1]);
+    const minVal = Math.min(...vals), maxVal = Math.max(...vals);
+    const isUp = vals[vals.length-1] >= vals[0];
+    const color = isUp ? '#22c55e' : '#ef4444';
+
+    priceChartInst = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: sparseLabels,
+        datasets: [{
+          data: vals,
+          borderColor: color,
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: true,
+          backgroundColor: isUp ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.07)',
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: {display: false},
+          tooltip: {
+            backgroundColor: '#1a1f26', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+            titleFont: {family:"'IBM Plex Mono'", size:10},
+            bodyFont:  {family:"'IBM Plex Mono'", size:11},
+            callbacks: {
+              title: (items) => labels[items[0].dataIndex],
+              label:  (c)    => ' $' + (c.raw < 1 ? c.raw.toFixed(5) : c.raw.toFixed(3))
+            }
+          }
+        },
+        scales: {
+          x: {ticks: {color:'#6b7280', font:{family:"'IBM Plex Mono'",size:9}, maxRotation:0, autoSkip:true, maxTicksLimit:8}, grid:{display:false}, border:{color:'rgba(255,255,255,0.07)'}},
+          y: {
+            min: minVal * 0.998, max: maxVal * 1.002,
+            ticks: {color:'#6b7280', font:{family:"'IBM Plex Mono'",size:10}, callback: v => v < 1 ? '$'+v.toFixed(4) : '$'+v.toFixed(2)},
+            grid: {color:'rgba(255,255,255,0.05)'}, border:{color:'rgba(255,255,255,0.07)'}
+          }
+        }
+      }
+    });
+    canvas.style.opacity = '1';
+  } catch(e) {
+    canvas.style.opacity = '1';
+    showToast('Chart load failed — rate limited, try again', 'error');
+  }
+}
+
+
+// ── MINI PRICE CHARTS (home screen) ──
+const MINI_COINS = ["BTC","ETH","SOL","TRX","JLP","PYTH","GMX","DOT","NEAR","AERO"];
+let miniPriceData = {};
+let miniChartInsts = {};
+
+async function initMiniCharts(){
+  const section = document.getElementById('miniChartsSection');
+  const coins = MINI_COINS.filter(t => COIN_MAP[t]);
+  const ids = coins.map(t => COIN_MAP[t].id).join(',');
+
+  // Show skeleton
+  section.innerHTML = `<div class="mini-chart-grid">${coins.map(t=>`
+    <div class="mini-chart-card" id="miniCard_${t}">
+      <div class="mini-chart-top">
+        <span class="mini-chart-sym">${t}</span>
+        <span class="mini-chart-chg" style="color:var(--muted)">—</span>
+      </div>
+      <div class="mini-chart-price" style="color:var(--muted)">Loading...</div>
+      <div style="height:40px;margin-top:6px;position:relative"><canvas id="miniCanvas_${t}"></canvas></div>
+      <div class="mini-chart-name">${COIN_MAP[t].name}</div>
+    </div>`).join('')}</div>`;
+
+  // Fetch prices — try multiple proxies
+  const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_30d_change=true`;
+  const proxies = [
+    apiUrl,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`,
+    `https://corsproxy.io/?url=${apiUrl}`,
+  ];
+  for(const url of proxies){
+    try {
+      const res = await fetch(url, {signal: AbortSignal.timeout(7000)});
+      if(!res.ok) continue;
+      let raw = await res.json();
+      // allorigins wraps in {contents: "..."}
+      if(raw.contents) raw = JSON.parse(raw.contents);
+      if(Object.keys(raw).length > 0){
+        miniPriceData = raw;
+        coins.forEach(t => renderMiniCard(t));
+        break;
+      }
+    } catch(e){ continue; }
+  }
+  if(Object.keys(miniPriceData).length === 0){
+    coins.forEach(t => {
+      const card = document.getElementById('miniCard_'+t);
+      if(card) card.querySelector('.mini-chart-price').textContent = '—';
+    });
+  }
+
+  // Fetch sparklines for each coin (7d)
+  for(const t of coins){
+    fetchMiniSparkline(t);
+    await new Promise(r => setTimeout(r, 300)); // small delay to avoid rate limit
+  }
+}
+
+function renderMiniCard(t){
+  const coin = COIN_MAP[t];
+  const data = miniPriceData[coin.id];
+  if(!data) return;
+  const price = data.usd;
+  const chg = data.usd_30d_change ?? 0;
+  const isPos = chg >= 0;
+  const priceStr = price < 0.01 ? '$'+price.toFixed(5)
+                 : price < 1    ? '$'+price.toFixed(4)
+                 : price < 100  ? '$'+price.toFixed(3)
+                 : '$'+price.toLocaleString(undefined,{maximumFractionDigits:2});
+  const card = document.getElementById('miniCard_'+t);
+  if(!card) return;
+  card.querySelector('.mini-chart-price').textContent = priceStr;
+  card.querySelector('.mini-chart-price').className = 'mini-chart-price ' + (isPos?'pos':'neg');
+  card.querySelector('.mini-chart-chg').textContent = (isPos?'+':'') + chg.toFixed(1) + '% 30d';
+  card.querySelector('.mini-chart-chg').className = 'mini-chart-chg ' + (isPos?'pos':'neg');
+  // Click to open prices page
+  card.onclick = () => { showPricesPage(); setTimeout(()=>selectCoinChart(t), 300); };
+}
+
+async function fetchMiniSparkline(t){
+  const coin = COIN_MAP[t];
+  const apiUrl = `https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart?vs_currency=usd&days=30`;
+  const proxies = [
+    apiUrl,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`,
+    `https://corsproxy.io/?url=${apiUrl}`,
+  ];
+  for(const url of proxies){
+    try {
+      const res = await fetch(url, {signal: AbortSignal.timeout(8000)});
+      if(!res.ok) continue;
+      let raw = await res.json();
+      if(raw.contents) raw = JSON.parse(raw.contents);
+      if(raw.prices){
+        drawSparkline('miniCanvas_'+t, raw.prices.map(p=>p[1]));
+        return;
+      }
+    } catch(e){ continue; }
+  }
+}
+
+function drawSparkline(canvasId, prices){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  if(miniChartInsts[canvasId]) miniChartInsts[canvasId].destroy();
+  const isUp = prices[prices.length-1] >= prices[0];
+  miniChartInsts[canvasId] = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: prices.map((_,i)=>i),
+      datasets: [{
+        data: prices,
+        borderColor: isUp ? '#22c55e' : '#ef4444',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: true,
+        backgroundColor: isUp ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend:{display:false}, tooltip:{enabled:false}},
+      scales: {
+        x: {display:false},
+        y: {display:false}
+      },
+      animation: {duration: 400}
+    }
+  });
+}
+
+// Update showPricesPage to work without the header button
+function showPricesPage(){
+  document.getElementById('pricesPage').style.display = 'block';
+  document.getElementById('miniChartsSection').style.display = 'none';
+  document.getElementById('navBar').style.display = 'none';
+  document.getElementById('kpiGrid').style.display = 'none';
+  document.getElementById('legendWrap').style.display = 'none';
+  document.querySelectorAll('.charts-grid').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('#monthSubTabs').forEach(el => el.style.display = 'none');
+  if(Object.keys(priceData).length === 0) fetchPrices();
+}
+
+function hidePricesPage(){
+  document.getElementById('pricesPage').style.display = 'none';
+  document.getElementById('miniChartsSection').style.display = 'block';
+  document.getElementById('navBar').style.display = 'flex';
+  document.getElementById('kpiGrid').style.display = 'grid';
+  document.getElementById('legendWrap').style.display = 'flex';
+  document.querySelectorAll('.charts-grid').forEach(el => el.style.display = 'grid');
 }
 
 loadData();activeYear=getYears().slice(-1)[0]||'ALL';buildNav();renderAll('ALL');
