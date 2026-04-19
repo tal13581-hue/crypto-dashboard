@@ -7,163 +7,148 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:#0a0c0f; --bg2:#111418; --bg3:#181c22; --bg4:#1e232b;
-  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13); --border3:rgba(255,255,255,0.2);
-  --text:#e8eaf0; --muted:#6b7280; --muted2:#4b5563;
-  --green:#22c55e; --red:#ef4444; --blue:#3b82f6; --accent:#f59e0b;
-  --font-mono:'IBM Plex Mono',monospace; --font-sans:'IBM Plex Sans',sans-serif;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c0f;--bg2:#111418;--bg3:#181c22;--bg4:#1e232b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--border3:rgba(255,255,255,0.2);
+  --text:#e8eaf0;--muted:#6b7280;--muted2:#4b5563;
+  --green:#22c55e;--red:#ef4444;--blue:#3b82f6;--accent:#f59e0b;
+  --font-mono:'IBM Plex Mono',monospace;--font-sans:'IBM Plex Sans',sans-serif;
 }
-html { scroll-behavior:smooth; }
-body { background:var(--bg); color:var(--text); font-family:var(--font-sans); font-size:14px; line-height:1.5; min-height:100vh; }
+body{background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:14px;line-height:1.5;min-height:100vh}
 
-header { border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:rgba(10,12,15,0.94); backdrop-filter:blur(12px); z-index:100; }
-.logo-mark { width:32px; height:32px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:600; font-size:13px; color:#000; }
-.header-left { display:flex; align-items:center; gap:14px; }
-.header-title { font-family:var(--font-mono); font-size:15px; font-weight:600; }
-.header-title span { color:var(--muted); font-weight:400; }
-.header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.btn { padding:7px 16px; border-radius:7px; font-size:12px; font-family:var(--font-mono); cursor:pointer; border:1px solid var(--border2); background:transparent; color:var(--text); transition:all .15s; display:flex; align-items:center; gap:6px; white-space:nowrap; }
-.btn:hover { border-color:var(--border3); background:var(--bg3); }
-.btn-accent { background:var(--accent); color:#000; border-color:var(--accent); font-weight:600; }
-.btn-accent:hover { background:#d97706; border-color:#d97706; }
-.btn-danger { border-color:rgba(239,68,68,0.4); color:var(--red); }
-.btn-danger:hover { background:rgba(239,68,68,0.1); }
-.source-pill { display:flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--border2); border-radius:20px; font-size:11px; font-family:var(--font-mono); color:var(--muted); }
-.dot { width:6px; height:6px; border-radius:50%; }
-.dot-green { background:var(--green); box-shadow:0 0 6px var(--green); }
-.dot-blue  { background:var(--blue);  box-shadow:0 0 6px var(--blue); }
+/* ── HEADER ── */
+header{border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,12,15,0.94);backdrop-filter:blur(12px);z-index:100}
+.logo-mark{width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:600;font-size:13px;color:#000}
+.header-left{display:flex;align-items:center;gap:14px}
+.header-title{font-family:var(--font-mono);font-size:15px;font-weight:600}
+.header-title span{color:var(--muted);font-weight:400}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{padding:7px 16px;border-radius:7px;font-size:12px;font-family:var(--font-mono);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text);transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--border3);background:var(--bg3)}
+.btn-accent{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+.btn-accent:hover{background:#d97706;border-color:#d97706}
+.btn-danger{border-color:rgba(239,68,68,0.4);color:var(--red)}
+.btn-danger:hover{background:rgba(239,68,68,0.1)}
 
-main { max-width:1280px; margin:0 auto; padding:28px 32px 80px; }
 
-/* KPI */
-.kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:24px; }
+
+/* ── MAIN ── */
+main{max-width:1280px;margin:0 auto;padding:28px 32px 80px}
+
+/* ── KPI ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px}
 @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-.kpi { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:16px 18px; position:relative; overflow:hidden; transition:border-color .2s; }
-.kpi:hover { border-color:var(--border2); }
-.kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent),transparent); opacity:0; transition:opacity .3s; }
-.kpi:hover::before { opacity:1; }
-.kpi-label { font-size:10px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:8px; }
-.kpi-value { font-family:var(--font-mono); font-size:20px; font-weight:600; letter-spacing:-0.5px; }
-.kpi-sub { font-size:11px; color:var(--muted); margin-top:3px; font-family:var(--font-mono); }
-.pos { color:var(--green); } .neg { color:var(--red); } .neu { color:var(--text); }
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s}
+.kpi:hover{border-color:var(--border2)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .3s}
+.kpi:hover::before{opacity:1}
+.kpi-label{font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.kpi-value{font-family:var(--font-mono);font-size:20px;font-weight:600;letter-spacing:-0.5px}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--font-mono)}
+.pos{color:var(--green)}.neg{color:var(--red)}.neu{color:var(--text)}
 
-/* NAV BAR — year dropdowns */
-.nav-bar { display:flex; align-items:center; gap:4px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
-.nav-item { position:relative; }
-.nav-btn { padding:7px 18px; border:1px solid var(--border); border-radius:8px; font-size:13px; font-family:var(--font-mono); font-weight:500; cursor:pointer; background:transparent; color:var(--muted); transition:all .15s; display:flex; align-items:center; gap:6px; white-space:nowrap; }
-.nav-btn:hover { color:var(--text); border-color:var(--border2); background:var(--bg3); }
-.nav-btn.active { background:var(--accent); color:#000; border-color:var(--accent); }
-.nav-btn.active:hover { background:#d97706; }
-.nav-btn .caret { font-size:9px; opacity:0.6; transition:transform .15s; }
-.nav-item:hover .caret { transform:rotate(180deg); }
+/* ── NAV (year dropdowns) ── */
+.nav-bar{display:flex;align-items:center;gap:4px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.nav-item{position:relative}
+.nav-btn{padding:7px 18px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font-mono);font-weight:500;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.nav-btn:hover{color:var(--text);border-color:var(--border2);background:var(--bg3)}
+.nav-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.caret{font-size:9px;opacity:0.6;transition:transform .15s}
+.nav-item:hover .caret{transform:rotate(180deg)}
+.nav-dropdown{position:absolute;top:calc(100% + 6px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:6px;min-width:140px;z-index:50;opacity:0;pointer-events:none;transform:translateY(-4px);transition:all .15s;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.nav-item:hover .nav-dropdown{opacity:1;pointer-events:all;transform:translateY(0)}
+.drop-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:6px;font-size:12px;font-family:var(--font-mono);cursor:pointer;color:var(--muted);transition:all .12s;white-space:nowrap}
+.drop-item:hover{background:var(--bg3);color:var(--text)}
+.drop-item.active{background:var(--text);color:var(--bg)}
 
-/* active month pill shown in nav */
-.nav-active-month { font-size:11px; font-family:var(--font-mono); color:var(--muted); padding:5px 12px; border:1px solid var(--border); border-radius:6px; background:var(--bg3); }
-.nav-active-month span { color:var(--text); font-weight:500; }
+.nav-active-month{font-size:11px;font-family:var(--font-mono);color:var(--muted);padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg3)}
+.nav-active-month span{color:var(--text);font-weight:500}
 
-/* DROPDOWN */
-.nav-dropdown { position:absolute; top:calc(100% + 6px); left:0; background:var(--bg2); border:1px solid var(--border2); border-radius:10px; padding:6px; min-width:140px; z-index:50; opacity:0; pointer-events:none; transform:translateY(-4px); transition:all .15s; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
-.nav-item:hover .nav-dropdown { opacity:1; pointer-events:all; transform:translateY(0); }
-.drop-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; border-radius:6px; font-size:12px; font-family:var(--font-mono); cursor:pointer; color:var(--muted); transition:all .12s; white-space:nowrap; }
-.drop-item:hover { background:var(--bg3); color:var(--text); }
-.drop-item.active { background:var(--text); color:var(--bg); }
-.drop-item.gs { color:var(--blue); }
-.drop-item.gs.active { background:var(--blue); color:#fff; }
-.drop-gs-dot { font-size:9px; opacity:0.7; }
+/* ── CONFLICT BAR ── */
 
-.conflict-bar { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:8px; padding:10px 16px; margin-bottom:18px; font-size:12px; font-family:var(--font-mono); display:none; align-items:center; gap:12px; flex-wrap:wrap; }
-.conflict-bar.show { display:flex; }
-.conflict-tag { background:rgba(239,68,68,0.2); color:#fca5a5; padding:2px 8px; border-radius:4px; font-size:10px; text-transform:uppercase; letter-spacing:.06em; }
 
-.charts-grid { display:grid; grid-template-columns:1fr 400px; gap:16px; margin-bottom:16px; }
+/* ── CHARTS ── */
+.charts-grid{display:grid;grid-template-columns:1fr 400px;gap:16px;margin-bottom:16px}
 @media(max-width:1050px){.charts-grid{grid-template-columns:1fr}}
-.chart-card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:20px; }
-.chart-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-.chart-title { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.chart-title{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.legend-wrap{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--muted)}
+.legend-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 
-/* PROTOCOL TABLE */
-.proto-table { width:100%; border-collapse:collapse; font-size:11px; }
-.proto-table th { font-size:9px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.08em; color:var(--muted2); padding:0 8px 8px; text-align:right; font-weight:400; }
-.proto-table th:first-child { text-align:left; }
-.proto-table td { padding:7px 8px; font-family:var(--font-mono); border-top:1px solid var(--border); text-align:right; vertical-align:middle; }
-.proto-table td:first-child { text-align:left; }
-.proto-table tr:hover td { background:var(--bg3); }
-.proto-color-dot { display:inline-block; width:7px; height:7px; border-radius:2px; margin-right:6px; vertical-align:middle; flex-shrink:0; }
-.apr-wrap { display:flex; align-items:center; gap:5px; justify-content:flex-end; }
-.apr-bar { height:4px; border-radius:2px; min-width:2px; }
-.token-tag { font-size:9px; color:var(--muted); background:var(--bg3); border:1px solid var(--border); border-radius:3px; padding:1px 5px; display:inline-block; }
+/* ── PROTOCOL TABLE ── */
+.proto-table{width:100%;border-collapse:collapse;font-size:11px}
+.proto-table th{font-size:9px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);padding:0 8px 8px;text-align:right;font-weight:400}
+.proto-table th:first-child{text-align:left}
+.proto-table td{padding:7px 8px;font-family:var(--font-mono);border-top:1px solid var(--border);text-align:right;vertical-align:middle}
+.proto-table td:first-child{text-align:left}
+.proto-table tr:hover td{background:var(--bg3)}
+.proto-dot{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.apr-wrap{display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.apr-bar{height:4px;border-radius:2px;min-width:2px}
+.token-tag{font-size:9px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;display:inline-block}
 
-.legend-wrap { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
-.legend-item { display:flex; align-items:center; gap:6px; font-size:11px; font-family:var(--font-mono); color:var(--muted); }
-.legend-sq { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:700px;margin:auto}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;background:var(--bg2)}
+.modal-title{font-family:var(--font-mono);font-size:14px;font-weight:600}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;padding:2px 6px;border-radius:4px;transition:color .15s}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:24px;max-height:80vh;overflow-y:auto}
+.modal-footer{padding:14px 24px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.form-label{display:block;font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.form-input,.form-select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:8px 11px;color:var(--text);font-family:var(--font-mono);font-size:12px;outline:none;transition:border-color .15s}
+.form-input:focus,.form-select:focus{border-color:var(--accent)}
+.form-select option{background:var(--bg2)}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.section-divider{font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:16px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}
+.col-headers{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr 28px;gap:8px;padding:0 0 4px;margin-bottom:4px}
+.col-h{font-size:9px;font-family:var(--font-mono);color:var(--muted2);text-transform:uppercase;letter-spacing:.07em}
 
-/* MODALS */
-.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); z-index:200; display:none; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
-.overlay.open { display:flex; }
-.modal { background:var(--bg2); border:1px solid var(--border2); border-radius:14px; width:100%; max-width:660px; margin:auto; }
-.modal-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; border-radius:14px 14px 0 0; background:var(--bg2); }
-.modal-title { font-family:var(--font-mono); font-size:14px; font-weight:600; }
-.modal-close { background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; line-height:1; padding:2px 6px; border-radius:4px; transition:color .15s; }
-.modal-close:hover { color:var(--text); }
-.modal-body { padding:24px; max-height:75vh; overflow-y:auto; }
-.form-group { margin-bottom:16px; }
-.form-label { display:block; font-size:10px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:6px; }
-.form-input, .form-select { width:100%; background:var(--bg3); border:1px solid var(--border2); border-radius:7px; padding:8px 11px; color:var(--text); font-family:var(--font-mono); font-size:12px; outline:none; transition:border-color .15s; }
-.form-input:focus, .form-select:focus { border-color:var(--accent); }
-.form-select option { background:var(--bg2); }
-.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.proto-section-title { font-size:10px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:8px; border-bottom:1px solid var(--border); padding-bottom:6px; }
-.proto-entries { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
-.proto-entry-card { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px; position:relative; }
-.proto-entry-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.proto-entry-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
-.proto-entry-label { font-size:9px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:4px; }
-.remove-entry-btn { position:absolute; top:8px; right:8px; width:22px; height:22px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:5px; color:var(--red); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; padding:0; line-height:1; }
-.remove-entry-btn:hover { background:rgba(239,68,68,0.3); }
-.add-proto-btn { width:100%; padding:9px; background:transparent; border:1px dashed var(--border2); border-radius:7px; color:var(--muted); font-family:var(--font-mono); font-size:12px; cursor:pointer; transition:all .15s; margin-bottom:16px; }
-.add-proto-btn:hover { border-color:var(--accent); color:var(--accent); }
-.total-preview { background:var(--bg3); border:1px solid var(--border); border-radius:7px; padding:10px 14px; font-family:var(--font-mono); font-size:13px; display:flex; justify-content:space-between; align-items:center; }
-.total-label { color:var(--muted); font-size:11px; }
-.total-num { font-size:16px; font-weight:600; }
-.modal-footer { padding:14px 24px 18px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+/* protocol entry row */
+.proto-entry{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;position:relative}
+.proto-entry-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr 28px;gap:8px;align-items:center}
+.remove-btn{width:28px;height:28px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:6px;color:var(--red);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;flex-shrink:0}
+.remove-btn:hover{background:rgba(239,68,68,0.3)}
+.calc-row{display:flex;gap:14px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);flex-wrap:wrap}
+.calc-chip{font-size:10px;font-family:var(--font-mono);color:var(--muted)}
+.calc-chip b{font-weight:500}
 
-.month-manage-list { display:flex; flex-direction:column; gap:6px; }
-.month-manage-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg3); border-radius:8px; border:1px solid var(--border); flex-wrap:wrap; }
-.month-manage-name { font-family:var(--font-mono); font-size:13px; flex:1; min-width:80px; }
-.month-manage-total { font-family:var(--font-mono); font-size:13px; min-width:80px; text-align:right; }
-.src-badge { font-size:10px; font-family:var(--font-mono); padding:2px 7px; border-radius:4px; min-width:52px; text-align:center; }
-.src-xl { background:rgba(34,197,94,0.15); color:var(--green); border:1px solid rgba(34,197,94,0.3); }
-.src-gs { background:rgba(59,130,246,0.15); color:var(--blue); border:1px solid rgba(59,130,246,0.3); }
+.add-row-btn{width:100%;padding:9px;background:transparent;border:1px dashed var(--border2);border-radius:7px;color:var(--muted);font-family:var(--font-mono);font-size:12px;cursor:pointer;transition:all .15s;margin-bottom:16px}
+.add-row-btn:hover{border-color:var(--accent);color:var(--accent)}
 
-.toast { position:fixed; bottom:28px; right:28px; background:var(--bg3); border:1px solid var(--border2); border-radius:9px; padding:12px 18px; font-family:var(--font-mono); font-size:12px; color:var(--text); z-index:999; transform:translateY(80px); opacity:0; transition:all .3s cubic-bezier(.34,1.56,.64,1); pointer-events:none; }
-.toast.show { transform:translateY(0); opacity:1; }
-.toast.success { border-color:rgba(34,197,94,0.5); }
-.toast.error   { border-color:rgba(239,68,68,0.5); }
+/* totals preview */
+.totals-box{background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:14px 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.total-item{text-align:center}
+.total-lbl{font-size:9px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px}
+.total-val{font-size:17px;font-family:var(--font-mono);font-weight:600}
 
-footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; font-size:11px; font-family:var(--font-mono); color:var(--muted2); flex-wrap:wrap; gap:8px; }
+/* manage modal */
+.manage-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:6px;flex-wrap:wrap}
+.manage-name{font-family:var(--font-mono);font-size:13px;flex:1;min-width:80px}
 
-/* ── SMART ENTRY MODAL ── */
-.entry-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:8px; }
-.entry-grid-5 { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 28px; gap:8px; align-items:end; }
-.calc-preview { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin:14px 0; }
-.calc-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:12px; font-family:var(--font-mono); border-bottom:1px solid var(--border); }
-.calc-row:last-child { border-bottom:none; font-weight:600; font-size:13px; padding-top:8px; }
-.calc-label { color:var(--muted); }
-.calc-value { }
-.entry-month-header { display:flex; gap:12px; margin-bottom:16px; }
-.entry-section-title { font-size:10px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:14px 0 8px; border-bottom:1px solid var(--border); padding-bottom:6px; }
-.proto-row-entry { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; position:relative; }
-.proto-row-inline { display:grid; grid-template-columns:1.8fr 1fr 1fr 1fr 28px; gap:8px; align-items:end; }
-.proto-row-calcs { display:flex; gap:16px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); flex-wrap:wrap; }
-.calc-chip { font-size:10px; font-family:var(--font-mono); color:var(--muted); }
-.calc-chip span { color:var(--text); font-weight:500; }
-.month-totals { background:var(--bg4); border:1px solid var(--border2); border-radius:8px; padding:12px 16px; margin:12px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-.month-total-item { text-align:center; }
-.month-total-label { font-size:9px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:4px; }
-.month-total-val { font-size:16px; font-family:var(--font-mono); font-weight:600; }
+
+/* toast */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:12px 18px;font-family:var(--font-mono);font-size:12px;color:var(--text);z-index:999;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:rgba(34,197,94,0.5)}
+.toast.error{border-color:rgba(239,68,68,0.5)}
+
+footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-family:var(--font-mono);color:var(--muted2);flex-wrap:wrap;gap:8px}
+
+.sub-tab{padding:5px 14px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:var(--font-mono);cursor:pointer;background:transparent;color:var(--muted);transition:all .15s}
+.sub-tab:hover{border-color:var(--border2);color:var(--text)}
+.sub-tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+.picker-month{padding:6px 4px;background:transparent;border:1px solid var(--border);border-radius:6px;font-family:var(--font-mono);font-size:11px;cursor:pointer;color:var(--muted);transition:all .12s;text-align:center}
+.picker-month:hover{border-color:var(--border2);color:var(--text);background:var(--bg4)}
+.picker-month.selected{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
 </style>
 </head>
 <body>
@@ -174,25 +159,17 @@ footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; al
     <div class="header-title">Crypto Returns <span>/ Dashboard</span></div>
   </div>
   <div class="header-right">
-    <div class="source-pill"><span class="dot dot-green"></span>Excel</div>
-    <div class="source-pill"><span class="dot dot-blue"></span>Google Sheets</div>
     <button class="btn" onclick="openManageModal()">⚙ Manage</button>
-    <button class="btn btn-accent" onclick="openEntryModal()">+ New month data</button>
+    <button class="btn btn-accent" onclick="openEntryModal(null)">+ New month</button>
   </div>
 </header>
 
 <main>
   <div class="kpi-grid" id="kpiGrid"></div>
-
-  <!-- Nav bar with year dropdowns -->
   <div class="nav-bar" id="navBar"></div>
+  <div id="monthSubTabs" style="display:none;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)"></div>
 
-  <div class="conflict-bar" id="conflictBar">
-    <span class="conflict-tag">⚠ Conflict</span>
-    <span id="conflictText"></span>
-  </div>
   <div class="legend-wrap" id="legendWrap"></div>
-
   <div class="charts-grid">
     <div class="chart-card">
       <div class="chart-header"><span class="chart-title" id="barTitle">Monthly returns</span></div>
@@ -203,7 +180,30 @@ footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; al
         <span class="chart-title">Protocol breakdown</span>
         <span style="font-size:10px;font-family:var(--font-mono);color:var(--muted)">hover for details</span>
       </div>
-      <div style="position:relative;height:180px;margin-bottom:16px"><canvas id="pieChart"></canvas></div>
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
+        <!-- Gains pie -->
+        <div style="flex:1;text-align:center">
+          <div style="font-size:9px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px">Gains</div>
+          <div style="position:relative;height:160px">
+            <canvas id="pieChart"></canvas>
+            <div id="pieCenter" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
+              <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Total</div>
+              <div id="pieCenterVal" style="font-size:15px;font-family:var(--font-mono);font-weight:600;color:var(--green)">$0</div>
+            </div>
+          </div>
+        </div>
+        <!-- Losses pie (hidden if no losses) -->
+        <div id="lossPieWrap" style="flex:1;text-align:center;display:none">
+          <div style="font-size:9px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px">Losses</div>
+          <div style="position:relative;height:160px">
+            <canvas id="lossPieChart"></canvas>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
+              <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Total</div>
+              <div id="lossPieCenterVal" style="font-size:15px;font-family:var(--font-mono);font-weight:600;color:var(--red)">$0</div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div id="protoTableWrap" style="overflow-x:auto"></div>
     </div>
   </div>
@@ -211,135 +211,91 @@ footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; al
 
 <footer>
   <span>Crypto Returns Dashboard</span>
-  <div style="display:flex;gap:16px;flex-wrap:wrap">
-    <span><span style="color:var(--green)">▪</span> Excel = source of record</span>
-    <span><span style="color:var(--blue)">◆</span> Google Sheets = overrides</span>
-    <span id="lastSaved" style="color:var(--muted2)"></span>
-  </div>
+  <span id="lastSaved" style="color:var(--muted2)"></span>
 </footer>
+
+<!-- ══════════════════════════════════════════════════
+     ENTRY MODAL — used for BOTH new months AND editing
+     ══════════════════════════════════════════════════ -->
+<div class="overlay" id="entryOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="entryTitle">New month</span>
+      <button class="modal-close" onclick="closeEntry()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Month + Source row -->
+      <div class="form-row-2">
+        <div>
+          <label class="form-label">Month &amp; year</label>
+          <div id="monthPicker" style="background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:12px">
+            <!-- Year row -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <button type="button" onclick="pickerPrevYear()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 6px">‹</button>
+              <span id="pickerYear" style="font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--text)">2026</span>
+              <button type="button" onclick="pickerNextYear()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 6px">›</button>
+            </div>
+            <!-- Month grid -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px" id="pickerMonths"></div>
+          </div>
+          <input type="hidden" id="eMonth"/>
+        </div>
+
+      </div>
+
+
+      <!-- Column headers -->
+      <div class="section-divider">Protocols — enter raw data, dashboard calculates the rest</div>
+      <div class="col-headers">
+        <div class="col-h">Protocol</div>
+        <div class="col-h">Token qty</div>
+        <div class="col-h">Symbol</div>
+        <div class="col-h">Price ($)</div>
+        <div class="col-h">Last month ($)</div>
+        <div></div>
+      </div>
+
+      <div id="eRows"></div>
+      <button class="add-row-btn" onclick="addEntryRow()">+ Add protocol</button>
+
+      <!-- Live totals -->
+      <div class="totals-box">
+        <div class="total-item">
+          <div class="total-lbl">Total invested</div>
+          <div class="total-val neu" id="eTotalInvest">$0</div>
+        </div>
+        <div class="total-item">
+          <div class="total-lbl">Monthly return</div>
+          <div class="total-val neu" id="eTotalReturn">$0</div>
+        </div>
+        <div class="total-item">
+          <div class="total-lbl">Portfolio APR</div>
+          <div class="total-val neu" id="eTotalAPR">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEntry()">Cancel</button>
+      <button class="btn btn-accent" onclick="saveEntry()">Save month</button>
+    </div>
+  </div>
+</div>
 
 <!-- MANAGE MODAL -->
 <div class="overlay" id="manageOverlay">
-  <div class="modal">
+  <div class="modal" style="max-width:580px">
     <div class="modal-header">
       <span class="modal-title">Manage months</span>
-      <button class="modal-close" onclick="closeManageModal()">×</button>
+      <button class="modal-close" onclick="closeManage()">×</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-bottom:16px">Click Edit to update data, or Delete to remove a month.</p>
-      <div class="month-manage-list" id="manageList"></div>
+      <p style="font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-bottom:16px">Click Edit to update a month's data.</p>
+      <div id="manageList"></div>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="exportJSON()">↓ Export JSON</button>
-      <button class="btn" onclick="closeManageModal()">Close</button>
-    </div>
-  </div>
-</div>
-
-
-
-<!-- ADD / EDIT MODAL (for editing 2024/2025 months) -->
-<div class="overlay" id="addOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="modalTitle">Edit month</span>
-      <button class="modal-close" onclick="closeAddModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row-2">
-        <div class="form-group">
-          <label class="form-label">Month name</label>
-          <input class="form-input" id="inputMonth" placeholder="e.g. JUN 24" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Source</label>
-          <select class="form-select" id="inputSource">
-            <option value="xl">Excel</option>
-            <option value="gs">Google Sheets</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group" id="conflictGroup" style="display:none">
-        <label class="form-label">Excel total ($)</label>
-        <input class="form-input" id="inputXlTotal" type="number" placeholder="e.g. 977" />
-      </div>
-      <div class="proto-section-title">Protocols</div>
-      <div class="proto-entries" id="protoEntries"></div>
-      <button class="add-proto-btn" onclick="addProtoRow()">+ Add protocol</button>
-      <div class="total-preview">
-        <span class="total-label">Calculated monthly total</span>
-        <span class="total-num neu" id="totalPreview">$0</span>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeAddModal()">Cancel</button>
-      <button class="btn btn-accent" onclick="saveMonth()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── SMART ENTRY MODAL ── -->
-<div class="overlay" id="entryOverlay">
-  <div class="modal" style="max-width:720px">
-    <div class="modal-header">
-      <span class="modal-title">Enter monthly data</span>
-      <button class="modal-close" onclick="closeEntryModal()">×</button>
-    </div>
-    <div class="modal-body">
-
-      <!-- Month + Source -->
-      <div class="entry-month-header">
-        <div class="form-group" style="flex:1;margin-bottom:0">
-          <label class="form-label">Month name</label>
-          <input class="form-input" id="entryMonth" placeholder="e.g. FEB 26" oninput="updateEntryMonth(this.value)"/>
-        </div>
-        <div class="form-group" style="flex:1;margin-bottom:0">
-          <label class="form-label">Source</label>
-          <select class="form-select" id="entrySource">
-            <option value="xl">Excel</option>
-            <option value="gs">Google Sheets</option>
-          </select>
-        </div>
-        <div class="form-group" id="entryConflictGroup" style="flex:1;margin-bottom:0;display:none">
-          <label class="form-label">Excel total ($)</label>
-          <input class="form-input" id="entryXlTotal" type="number" placeholder="e.g. 977"/>
-        </div>
-      </div>
-      <div id="entrySource" style="display:none"></div>
-
-      <div class="entry-section-title">Protocol rows — enter raw data, dashboard calculates the rest</div>
-
-      <!-- Column headers -->
-      <div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr 28px;gap:8px;padding:0 0 4px;margin-bottom:2px">
-        <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Protocol</div>
-        <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Token amount</div>
-        <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Token symbol</div>
-        <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Token price ($)</div>
-        <div></div>
-      </div>
-      <div id="entryRows"></div>
-      <button class="add-proto-btn" onclick="addEntryRow()">+ Add protocol</button>
-
-      <!-- Live totals -->
-      <div class="month-totals" id="entryTotals">
-        <div class="month-total-item">
-          <div class="month-total-label">Total invested</div>
-          <div class="month-total-val neu" id="totalInvestedPreview">$0</div>
-        </div>
-        <div class="month-total-item">
-          <div class="month-total-label">Total return</div>
-          <div class="month-total-val neu" id="totalReturnPreview">$0</div>
-        </div>
-        <div class="month-total-item">
-          <div class="month-total-label">Portfolio APR</div>
-          <div class="month-total-val neu" id="totalAPRPreview">—</div>
-        </div>
-      </div>
-
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeEntryModal()">Cancel</button>
-      <button class="btn btn-accent" onclick="saveEntryMonth()">Save month</button>
+      <button class="btn" onclick="closeManage()">Close</button>
     </div>
   </div>
 </div>
@@ -347,7 +303,10 @@ footer { border-top:1px solid var(--border); padding:16px 32px; display:flex; al
 <div class="toast" id="toast"></div>
 
 <script>
-const DEFAULT_DATA = {
+// ═══════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════
+const DEFAULT = {
   "JUN 24":{total:307,source:"xl",rows:[{p:"Binance",v:190,qty:null,token:null,investUsd:28000},{p:"SyncSwap",v:31,qty:1.039,token:"ETH",investUsd:3400},{p:"Mode",v:55,qty:67555,token:"MODE",investUsd:1300},{p:"Kamino",v:31,qty:53,token:"SOL",investUsd:8400}]},
   "JUL 24":{total:902,source:"xl",rows:[{p:"Binance",v:162,qty:null,token:null,investUsd:28500},{p:"SyncSwap",v:33,qty:1.039,token:"ETH",investUsd:3400},{p:"Mode",v:56,qty:67555,token:"MODE",investUsd:1300},{p:"Kamino",v:204,qty:38.38,token:"SOL",investUsd:8400},{p:"Sanctum",v:215,qty:72,token:"SOL",investUsd:10080},{p:"BlockCentral",v:62,qty:167.21,token:"LP",investUsd:2123},{p:"Ref Finance",v:170,qty:240,token:"NEAR",investUsd:2400}]},
   "AUG 24":{total:838,source:"xl",rows:[{p:"Binance",v:117,qty:null,token:null,investUsd:19608},{p:"SyncSwap",v:506,qty:1.039,token:"ETH",investUsd:3400},{p:"Kamino",v:7,qty:46.11,token:"SOL",investUsd:7500},{p:"BlockCentral",v:48,qty:176.85,token:"LP",investUsd:2123},{p:"TRX Bot",v:27,qty:31200,token:"TRX",investUsd:2808},{p:"Ref Finance",v:133,qty:120,token:"NEAR",investUsd:1200}]},
@@ -364,28 +323,55 @@ const DEFAULT_DATA = {
   "SEP 25":{total:806,source:"xl",rows:[{p:"TRX Bot",v:148,qty:73439,token:"TRX",investUsd:25035},{p:"Kamino",v:504,qty:1732,token:"JLP",investUsd:9387},{p:"Aerodrome",v:39,qty:0.18622,token:"AERO",investUsd:525},{p:"Cetus",v:13,qty:8266,token:"CETUS+SUI",investUsd:1613},{p:"DOT Staking",v:23,qty:748.86,token:"DOT",investUsd:2898},{p:"NEAR Staking",v:16,qty:1711.7,token:"NEAR",investUsd:4190},{p:"MGX Staking",v:21,qty:319.27,token:"GMX",investUsd:0},{p:"USDC Autopilot",v:42,qty:6009,token:"USDC",investUsd:6009}]},
   "OCT 25":{total:593,source:"xl",rows:[{p:"TRX Bot",v:44,qty:23423,token:"TRX",investUsd:6825},{p:"Kamino",v:365,qty:1796.25,token:"JLP",investUsd:10239},{p:"Cetus",v:-10,qty:14741,token:"CETUS+SUI",investUsd:1520},{p:"DOT Staking",v:39,qty:769.77,token:"DOT",investUsd:2186},{p:"NEAR Staking",v:13,qty:1719.32,token:"NEAR",investUsd:4814},{p:"AERO Staking",v:41,qty:2598,token:"USDC",investUsd:2598},{p:"MGX Staking",v:59,qty:319.27,token:"GMX",investUsd:4974},{p:"SideShift",v:2,qty:2347,token:"XAI",investUsd:369},{p:"USDC Autopilot",v:40,qty:6040,token:"USDC",investUsd:6040}]},
   "NOV 25":{total:-941,source:"gs",xlTotal:371,conflict:true,rows:[{p:"TRX Bot",v:47,qty:23740,token:"TRX",investUsd:6647},{p:"Kamino",v:-1194,qty:1538,token:"JLP",investUsd:7259},{p:"Cetus",v:9,qty:650,token:"CETUS+SUI",investUsd:1003},{p:"DOT Staking",v:13,qty:775,token:"DOT",investUsd:1783},{p:"AERO Staking",v:131,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:48,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:4,qty:9400,token:"PYTH",investUsd:705}]},
-  "DEC 25":{total:47,source:"gs",conflict:false,rows:[{p:"TRX Bot",v:89,qty:25310,token:"TRX",investUsd:7216},{p:"Kamino",v:-174,qty:1538,token:"JLP",investUsd:7059},{p:"DOT Staking",v:14,qty:775,token:"DOT",investUsd:1550},{p:"AERO Staking",v:80,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:39,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:0,qty:26000,token:"PYTH",investUsd:1602}]}
+  "DEC 25":{total:47,source:"gs",conflict:false,rows:[{p:"TRX Bot",v:89,qty:25310,token:"TRX",investUsd:7216},{p:"Kamino",v:-174,qty:1538,token:"JLP",investUsd:7059},{p:"DOT Staking",v:14,qty:775,token:"DOT",investUsd:1550},{p:"AERO Staking",v:80,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:39,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:0,qty:26000,token:"PYTH",investUsd:1602}]},
+  "MAR 26":{total:81,source:"dashboard",rows:[
+    {p:"TRX Bot",v:37,qty:26599.78,token:"TRX",investUsd:8762},
+    {p:"Kamino x 2.5",v:241,qty:1262,token:"JLP",investUsd:4914},
+    {p:"Kamino x 2.5 #2",v:-231,qty:940.1164,token:"JLP",investUsd:3661},
+    {p:"PYTH",v:22,qty:26639,token:"PYTH",investUsd:1219},
+    {p:"GMX Staking",v:12,qty:345.21,token:"GMX",investUsd:2312}
+  ]}
 };
 
-const COLORS={"Kamino":"#3b82f6","TRX Bot":"#22c55e","Binance":"#f59e0b","Ref Finance":"#ef4444","SyncSwap":"#8b5cf6","Sanctum":"#d97706","BlockCentral":"#ec4899","Aerodrome":"#84cc16","Cetus":"#06b6d4","Meridian":"#f87171","DOT Staking":"#4ade80","NEAR Staking":"#fde68a","Fuel":"#c084fc","Mode":"#60a5fa","USDC Autopilot":"#2dd4bf","MGX Staking":"#fb923c","Kamino Airdrop":"#93c5fd","AERO Staking":"#64748b","GMX Staking":"#67e8f9","PYTH":"#a3e635","SideShift":"#94a3b8"};
+const COLORS={"Kamino":"#3b82f6","TRX Bot":"#22c55e","Binance":"#f59e0b","Ref Finance":"#ef4444","SyncSwap":"#8b5cf6","Sanctum":"#d97706","BlockCentral":"#ec4899","Aerodrome":"#84cc16","Cetus":"#06b6d4","Meridian":"#f87171","DOT Staking":"#4ade80","NEAR Staking":"#fde68a","Fuel":"#c084fc","Mode":"#60a5fa","USDC Autopilot":"#2dd4bf","MGX Staking":"#fb923c","Kamino Airdrop":"#93c5fd","AERO Staking":"#64748b","GMX Staking":"#67e8f9","PYTH":"#a3e635","SideShift":"#94a3b8","Kamino x 2.5":"#60a5fa","Kamino x 2.5 #2":"#f87171"};
+
+const PROTO_LINKS = {
+  "AERO Staking": "https://theautopilot.xyz/app/aero",
+  "Aerodrome":    "https://theautopilot.xyz/app/aero",
+  "Kamino":       "https://kamino.finance/multiply",
+  "PYTH":         "https://staking.pyth.network/",
+  "GMX Staking":  "https://app.gmx.io/#/stake",
+  "MGX Staking":  "https://app.gmx.io/#/stake"
+};
 const COLOR_POOL=["#3b82f6","#22c55e","#f59e0b","#ef4444","#8b5cf6","#d97706","#ec4899","#84cc16","#06b6d4","#f87171","#4ade80","#fde68a","#c084fc","#60a5fa","#2dd4bf","#fb923c","#93c5fd","#64748b","#67e8f9","#a3e635","#94a3b8"];
-let colorIdx=0;
-const gc=p=>{if(!COLORS[p]){COLORS[p]=COLOR_POOL[colorIdx%COLOR_POOL.length];colorIdx++;}return COLORS[p];};
+let _ci=0;
+const gc=p=>{if(!COLORS[p]){COLORS[p]=COLOR_POOL[_ci%COLOR_POOL.length];_ci++;}return COLORS[p];};
 
-let RAW={}, active="ALL", activeYear="ALL", barChart=null, pieChart=null, editingMonth=null;
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let RAW={}, active="ALL", activeYear="ALL", barChart=null, pieChart=null;
+const STORAGE_KEY = 'crypto_dash_v3';
 
-function loadData(){try{const s=localStorage.getItem('crypto_dash_v3');if(s){RAW=JSON.parse(s);updateLastSaved();return;}}catch(e){}RAW=JSON.parse(JSON.stringify(DEFAULT_DATA));}
-function saveData(){localStorage.setItem('crypto_dash_v3',JSON.stringify(RAW));document.getElementById('lastSaved').textContent='Saved '+new Date().toLocaleTimeString();}
-function updateLastSaved(){if(localStorage.getItem('crypto_dash_v3'))document.getElementById('lastSaved').textContent='Loaded from storage';}
+function loadData(){
+  try{const s=localStorage.getItem(STORAGE_KEY);if(s){RAW=JSON.parse(s);document.getElementById('lastSaved').textContent='Loaded from storage';return;}}catch(e){}
+  RAW=JSON.parse(JSON.stringify(DEFAULT));
+}
+function saveData(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(RAW));
+  document.getElementById('lastSaved').textContent='Saved '+new Date().toLocaleTimeString();
+}
 
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
 const fmt=v=>(v<0?'-':'')+'$'+Math.abs(Math.round(v)).toLocaleString();
 const fmtPct=v=>(v>=0?'+':'')+v.toFixed(1)+'%';
-const fmtQty=q=>q===null||q===undefined?'—':(q>1000?q.toLocaleString(undefined,{maximumFractionDigits:0}):parseFloat(q.toFixed(4)).toString());
-
-function getMonths(){return Object.keys(RAW);}
-function getYear(m){return m.slice(-2);}  // "JUN 24" -> "24"
-function getYears(){return [...new Set(getMonths().map(getYear))].sort();}
-function getMonthsForYear(yr){return yr==="ALL"?getMonths():getMonths().filter(m=>getYear(m)===yr);}
+const fmtQ=q=>q==null?'—':(q>1000?q.toLocaleString(undefined,{maximumFractionDigits:0}):parseFloat(Number(q).toFixed(4)).toString());
+const getMonths=()=>Object.keys(RAW);
+const getYear=m=>m.slice(-2);
+const getYears=()=>[...new Set(getMonths().map(getYear))].sort();
+const getMonthsForYear=yr=>yr==='ALL'?getMonths():getMonths().filter(m=>getYear(m)===yr);
 
 function aggRows(rows){
   const m={};
@@ -397,74 +383,58 @@ function aggRows(rows){
   });
   return m;
 }
-function calcAPR(monthlyReturn,investUsd){
-  if(!investUsd||investUsd<=0)return null;
-  return(monthlyReturn*12/investUsd)*100;
-}
+const calcAPR=(ret,inv)=>inv>0?(ret*12/inv)*100:null;
 
-// ── KPI ──
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
 function renderKPI(month){
   const el=document.getElementById('kpiGrid');
-  const visibleMonths = getMonthsForYear(activeYear).filter(m=>month==="ALL"||m===month);
-
-  if(month==="ALL"){
-    let sum=0,bestV=-Infinity,worstV=Infinity,bestM='',worstM='',totalInvest=0;
-    const months = getMonthsForYear(activeYear);
-    months.forEach(m=>{
-      const v=RAW[m].total; sum+=v;
-      if(v>bestV){bestV=v;bestM=m;} if(v<worstV){worstV=v;worstM=m;}
-    });
-    // total invested = latest month's investment (most recent snapshot)
-    const lastMonth = months[months.length-1];
-    if(lastMonth){const a=aggRows(RAW[lastMonth].rows);Object.values(a).forEach(d=>{totalInvest+=d.investUsd||0;});}
-    const avg=months.length?Math.round(sum/months.length):0;
-    const gsMths=months.filter(m=>RAW[m].source==='gs').length;
+  const months=getMonthsForYear(activeYear);
+  if(month==='ALL'){
+    let sum=0,bV=-Infinity,wV=Infinity,bM='',wM='',inv=0;
+    months.forEach(m=>{const v=RAW[m].total;sum+=v;if(v>bV){bV=v;bM=m;}if(v<wV){wV=v;wM=m;}});
+    const last=months[months.length-1];
+    if(last)Object.values(aggRows(RAW[last].rows)).forEach(d=>{inv+=d.investUsd||0;});
     el.innerHTML=`
-      <div class="kpi"><div class="kpi-label">Total return</div><div class="kpi-value ${sum>=0?'pos':'neg'}">${fmt(sum)}</div><div class="kpi-sub">${activeYear==="ALL"?"all time":activeYear}</div></div>
-      <div class="kpi"><div class="kpi-label">Monthly avg</div><div class="kpi-value neu">${fmt(avg)}</div><div class="kpi-sub">per month</div></div>
-      <div class="kpi"><div class="kpi-label">Total invested</div><div class="kpi-value neu" style="font-size:18px">${fmt(totalInvest)}</div><div class="kpi-sub">latest snapshot</div></div>
-      <div class="kpi"><div class="kpi-label">Best month</div><div class="kpi-value pos" style="font-size:16px">${fmt(bestV)}</div><div class="kpi-sub">${bestM}</div></div>
-      <div class="kpi"><div class="kpi-label">Worst month</div><div class="kpi-value neg" style="font-size:16px">${fmt(worstV)}</div><div class="kpi-sub">${worstM}</div></div>
-      <div class="kpi"><div class="kpi-label">Months</div><div class="kpi-value neu">${months.length}</div><div class="kpi-sub">${gsMths} from Sheets</div></div>`;
+      <div class="kpi"><div class="kpi-label">Total return</div><div class="kpi-value ${sum>=0?'pos':'neg'}">${fmt(sum)}</div><div class="kpi-sub">${activeYear==='ALL'?'all time':'20'+activeYear}</div></div>
+      <div class="kpi"><div class="kpi-label">Monthly avg</div><div class="kpi-value neu">${fmt(Math.round(sum/(months.length||1)))}</div><div class="kpi-sub">per month</div></div>
+      <div class="kpi"><div class="kpi-label">Total invested</div><div class="kpi-value neu" style="font-size:18px">${fmt(inv)}</div><div class="kpi-sub">latest snapshot</div></div>
+      <div class="kpi"><div class="kpi-label">Best month</div><div class="kpi-value pos" style="font-size:16px">${fmt(bV)}</div><div class="kpi-sub">${bM}</div></div>
+      <div class="kpi"><div class="kpi-label">Worst month</div><div class="kpi-value neg" style="font-size:16px">${fmt(wV)}</div><div class="kpi-sub">${wM}</div></div>
+      <div class="kpi"><div class="kpi-label">Months</div><div class="kpi-value neu">${months.length}</div><div class="kpi-sub">months</div></div>`;
   } else {
     const d=RAW[month];
     const aggd=aggRows(d.rows);
     const ents=Object.entries(aggd);
     const best=ents.length?ents.reduce((a,b)=>b[1].v>a[1].v?b:a):['—',{v:0}];
     const worst=ents.length?ents.reduce((a,b)=>b[1].v<a[1].v?b:a):['—',{v:0}];
-    const totalInvest=ents.reduce((s,[,d])=>s+(d.investUsd||0),0);
-    const actualAPR=totalInvest>0?calcAPR(d.total,totalInvest):null;
-    const srcLabel=d.source==='gs'?'<span style="color:var(--blue)">◆ Sheets</span>':'<span style="color:var(--green)">▪ Excel</span>';
+    const inv=ents.reduce((s,[,x])=>s+(x.investUsd||0),0);
+    const apr=calcAPR(d.total,inv);
+    const src='';
     el.innerHTML=`
-      <div class="kpi"><div class="kpi-label">Return ${srcLabel}</div><div class="kpi-value ${d.total>=0?'pos':'neg'}">${fmt(d.total)}</div><div class="kpi-sub">${month}</div></div>
-      <div class="kpi"><div class="kpi-label">Total invested</div><div class="kpi-value neu" style="font-size:18px">${fmt(totalInvest)}</div><div class="kpi-sub">this month</div></div>
-      <div class="kpi"><div class="kpi-label">Actual APR</div><div class="kpi-value ${actualAPR!=null&&actualAPR>=0?'pos':'neg'}" style="font-size:18px">${actualAPR!=null?fmtPct(actualAPR):'—'}</div><div class="kpi-sub">annualised</div></div>
+      <div class="kpi"><div class="kpi-label">Return</div><div class="kpi-value ${d.total>=0?'pos':'neg'}">${fmt(d.total)}</div><div class="kpi-sub">${month}</div></div>
+      <div class="kpi"><div class="kpi-label">Total invested</div><div class="kpi-value neu" style="font-size:18px">${fmt(inv)}</div><div class="kpi-sub">this month</div></div>
+      <div class="kpi"><div class="kpi-label">Actual APR</div><div class="kpi-value ${apr!=null&&apr>=0?'pos':'neg'}" style="font-size:18px">${apr!=null?fmtPct(apr):'—'}</div><div class="kpi-sub">annualised</div></div>
       <div class="kpi"><div class="kpi-label">Best protocol</div><div class="kpi-value pos" style="font-size:16px">${fmt(best[1].v)}</div><div class="kpi-sub">${best[0]}</div></div>
       <div class="kpi"><div class="kpi-label">Worst protocol</div><div class="kpi-value neg" style="font-size:16px">${fmt(worst[1].v)}</div><div class="kpi-sub">${worst[0]}</div></div>
       <div class="kpi"><div class="kpi-label">Protocols</div><div class="kpi-value neu">${ents.length}</div><div class="kpi-sub">active</div></div>`;
   }
 }
 
-function renderConflict(month){
-  const bar=document.getElementById('conflictBar'),txt=document.getElementById('conflictText');
-  if(month==="ALL"||!RAW[month]||!RAW[month].conflict){bar.classList.remove('show');return;}
-  const d=RAW[month];bar.classList.add('show');
-  txt.innerHTML=`Google Sheets: <span class="${d.total>=0?'pos':'neg'}" style="font-weight:600">${fmt(d.total)}</span>
-    &nbsp;·&nbsp; Excel was: <span style="color:var(--muted)">${fmt(d.xlTotal)}</span>
-    &nbsp;·&nbsp; Δ <span class="neg">${fmt(d.total-d.xlTotal)}</span> — Google Sheets wins.`;
-}
+
 
 function renderBar(month){
   if(barChart)barChart.destroy();
   const months=getMonthsForYear(activeYear);
-  document.getElementById('barTitle').textContent=month==="ALL"?`Monthly returns${activeYear!=="ALL"?' — '+activeYear:''}`:`${month} — by protocol`;
+  document.getElementById('barTitle').textContent=month==='ALL'?`Monthly returns — 20${activeYear}`:`${month} — by protocol`;
   let labels,data,colors;
-  if(month==="ALL"){
-    labels=months; data=months.map(m=>RAW[m].total);
-    colors=months.map(m=>{const d=RAW[m];return d.source==='gs'?(d.total>=0?'#3b82f6':'#93c5fd'):(d.total>=0?'#22c55e':'#ef4444');});
-  } else {
+  if(month==='ALL'){
+    labels=months;data=months.map(m=>RAW[m].total);
+    colors=months.map(m=>RAW[m].total>=0?'#22c55e':'#ef4444');
+  }else{
     const sorted=Object.entries(aggRows(RAW[month].rows)).sort((a,b)=>b[1].v-a[1].v);
-    labels=sorted.map(e=>e[0]); data=sorted.map(e=>Math.round(e[1].v)); colors=sorted.map(e=>gc(e[0]));
+    labels=sorted.map(e=>e[0]);data=sorted.map(e=>Math.round(e[1].v));colors=sorted.map(e=>gc(e[0]));
   }
   barChart=new Chart(document.getElementById('barChart').getContext('2d'),{
     type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:4,borderSkipped:false}]},
@@ -474,394 +444,312 @@ function renderBar(month){
   });
 }
 
+let lossPieChart=null;
 function renderProtoTable(month){
   if(pieChart)pieChart.destroy();
-  let aggd={};
+  if(lossPieChart)lossPieChart.destroy();
   const months=getMonthsForYear(activeYear);
-  if(month==="ALL"){
-    months.forEach(m=>{
-      const a=aggRows(RAW[m].rows);
-      Object.entries(a).forEach(([p,d])=>{if(!aggd[p])aggd[p]={v:0,investUsd:0,token:d.token,qty:d.qty};aggd[p].v+=d.v;aggd[p].investUsd+=d.investUsd||0;});
-    });
-  } else { aggd=aggRows(RAW[month].rows); }
-
+  let aggd={};
+  if(month==='ALL'){months.forEach(m=>{const a=aggRows(RAW[m].rows);Object.entries(a).forEach(([p,d])=>{if(!aggd[p])aggd[p]={v:0,investUsd:0,token:d.token,qty:d.qty};aggd[p].v+=d.v;aggd[p].investUsd+=d.investUsd||0;});});}
+  else aggd=aggRows(RAW[month].rows);
   const sorted=Object.entries(aggd).sort((a,b)=>b[1].v-a[1].v);
-  const posTotal=sorted.filter(e=>e[1].v>0).reduce((s,e)=>s+e[1].v,0);
+  const posSorted=sorted.filter(e=>e[1].v>0);
+  const negSorted=sorted.filter(e=>e[1].v<0);
+  const posTotal=posSorted.reduce((s,e)=>s+e[1].v,0);
+  const negTotal=negSorted.reduce((s,e)=>s+e[1].v,0);
   const maxAPR=Math.max(1,...sorted.map(([,d])=>{const a=calcAPR(d.v,d.investUsd);return a?Math.abs(a):0;}));
 
-  const posSorted=sorted.filter(e=>e[1].v>0);
+  // Gains pie
+  document.getElementById('pieCenterVal').textContent=fmt(posTotal);
   pieChart=new Chart(document.getElementById('pieChart').getContext('2d'),{
-    type:'doughnut',
-    data:{labels:posSorted.map(e=>e[0]),datasets:[{data:posSorted.map(e=>Math.round(e[1].v)),backgroundColor:posSorted.map(e=>gc(e[0])),borderWidth:0,hoverOffset:4}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1f26',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleFont:{family:"'IBM Plex Mono'"},bodyFont:{family:"'IBM Plex Mono'"},callbacks:{label:c=>` ${fmt(c.raw)} (${posTotal>0?((c.raw/posTotal)*100).toFixed(1):0}%)`}}}}
+    type:'doughnut',data:{labels:posSorted.map(e=>e[0]),datasets:[{data:posSorted.map(e=>Math.round(e[1].v)),backgroundColor:posSorted.map(e=>gc(e[0])),borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1f26',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleFont:{family:"'IBM Plex Mono'"},bodyFont:{family:"'IBM Plex Mono'"},callbacks:{label:c=>` ${fmt(c.raw)} (${posTotal>0?((c.raw/posTotal)*100).toFixed(1):0}%)`}}}}
   });
 
-  const isAll=month==="ALL";
+  // Losses pie — only show if there are losses
+  const lossPieWrap=document.getElementById('lossPieWrap');
+  if(negSorted.length>0){
+    lossPieWrap.style.display='block';
+    document.getElementById('lossPieCenterVal').textContent=fmt(negTotal);
+    lossPieChart=new Chart(document.getElementById('lossPieChart').getContext('2d'),{
+      type:'doughnut',data:{labels:negSorted.map(e=>e[0]),datasets:[{data:negSorted.map(e=>Math.round(Math.abs(e[1].v))),backgroundColor:negSorted.map(e=>gc(e[0])),borderWidth:0,hoverOffset:4}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1f26',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleFont:{family:"'IBM Plex Mono'"},bodyFont:{family:"'IBM Plex Mono'"},callbacks:{label:c=>` -${fmt(c.raw)} (${negTotal!==0?((c.raw/Math.abs(negTotal))*100).toFixed(1):0}%)`}}}}
+    });
+  } else {
+    lossPieWrap.style.display='none';
+  }
+  const isAll=month==='ALL';
   document.getElementById('protoTableWrap').innerHTML=`
-    <table class="proto-table">
-      <thead><tr>
-        <th>Protocol</th>
-        ${!isAll?'<th>Holdings</th>':''}
-        ${!isAll?'<th>Invested</th>':''}
-        <th>Return</th>
-        <th>APR</th>
-      </tr></thead>
-      <tbody>
-        ${sorted.map(([p,d])=>{
-          const apr=calcAPR(d.v,d.investUsd);
-          const barW=apr!==null?Math.min(55,Math.abs(apr)/maxAPR*55):0;
-          const barC=apr!==null?(apr>=0?'var(--green)':'var(--red)'):'var(--muted)';
-          const tok=d.qty&&d.token?`${fmtQty(d.qty)} <span class="token-tag">${d.token}</span>`:'—';
-          return `<tr>
-            <td><span class="proto-color-dot" style="background:${gc(p)}"></span>${p}</td>
-            ${!isAll?`<td style="color:var(--muted)">${tok}</td>`:''}
-            ${!isAll?`<td>${d.investUsd?fmt(d.investUsd):'—'}</td>`:''}
-            <td class="${d.v>=0?'pos':'neg'}">${fmt(d.v)}</td>
-            <td><div class="apr-wrap"><span style="color:${barC};min-width:52px;text-align:right">${apr!==null?fmtPct(apr):'—'}</span><div class="apr-bar" style="width:${barW}px;background:${barC};opacity:0.55"></div></div></td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
+    <table class="proto-table"><thead><tr>
+      <th>Protocol</th>${!isAll?'<th>Holdings</th>':''}${!isAll?'<th>Invested</th>':''}
+      <th>Return</th><th>APR</th>
+    </tr></thead><tbody>
+    ${sorted.map(([p,d])=>{
+      const apr=calcAPR(d.v,d.investUsd);
+      const bw=apr!==null?Math.min(55,Math.abs(apr)/maxAPR*55):0;
+      const bc=apr!==null?(apr>=0?'var(--green)':'var(--red)'):'var(--muted)';
+      const tok=d.qty&&d.token?`${fmtQ(d.qty)} <span class="token-tag">${d.token}</span>`:'—';
+      return `<tr>
+        <td><span class="proto-dot" style="background:${gc(p)}"></span>${PROTO_LINKS[p]?`<a href="${PROTO_LINKS[p]}" target="_blank" style="color:var(--text);text-decoration:none;border-bottom:1px dashed var(--muted)">${p}</a>`:p}</td>
+        ${!isAll?`<td style="color:var(--muted)">${tok}</td>`:''}
+        ${!isAll?`<td>${d.investUsd?fmt(d.investUsd):'—'}</td>`:''}
+        <td class="${d.v>=0?'pos':'neg'}">${fmt(d.v)}</td>
+        <td><div class="apr-wrap"><span style="color:${bc};min-width:52px;text-align:right">${apr!==null?fmtPct(apr):'—'}</span><div class="apr-bar" style="width:${bw}px;background:${bc};opacity:0.55"></div></div></td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>`;
 }
 
 function renderLegend(month){
   let aggd={};
   const months=getMonthsForYear(activeYear);
-  if(month==="ALL"){months.forEach(m=>RAW[m].rows.forEach(r=>{if(!aggd[r.p])aggd[r.p]=0;aggd[r.p]+=r.v;}));}
+  if(month==='ALL')months.forEach(m=>RAW[m].rows.forEach(r=>{if(!aggd[r.p])aggd[r.p]=0;aggd[r.p]+=r.v;}));
   else{const a=aggRows(RAW[month].rows);Object.entries(a).forEach(([p,d])=>{aggd[p]=d.v;});}
   const top=Object.entries(aggd).sort((a,b)=>b[1]-a[1]).slice(0,9).map(e=>e[0]);
   document.getElementById('legendWrap').innerHTML=top.map(p=>`<span class="legend-item"><span class="legend-sq" style="background:${gc(p)}"></span>${p}</span>`).join('');
 }
 
-function renderAll(month){
-  renderKPI(month);renderConflict(month);renderBar(month);renderProtoTable(month);renderLegend(month);
-}
+function renderAll(month){renderKPI(month);renderBar(month);renderProtoTable(month);renderLegend(month);}
 
-// ── NAV BAR (year dropdowns) ──
+// ── NAV ──
 function buildNav(){
   const wrap=document.getElementById('navBar');
   const years=getYears();
-  let html=`<div class="nav-item"><button class="nav-btn${active==="ALL"&&activeYear==="ALL"?" active":""}" onclick="selectAll()">All</button></div>`;
-  years.forEach(yr=>{
-    const months=getMonthsForYear(yr);
-    const yearActive=activeYear===yr;
-    const dropItems=months.map(m=>{
-      const isGs=RAW[m]&&RAW[m].source==="gs";
-      const isCur=active===m;
-      return `<div class="drop-item${isGs?" gs":""}${isCur?" active":""}" onclick="selectMonth('${m}','${yr}')">${m}${isGs?" <span class=drop-gs-dot>◆</span>":""}</div>`;
-    }).join("");
-    html+=`<div class="nav-item"><button class="nav-btn${yearActive?" active":""}">20${yr} <span class="caret">▼</span></button><div class="nav-dropdown">${dropItems}</div></div>`;
-  });
-  if(active!=="ALL"){
-    const isGs=RAW[active]&&RAW[active].source==="gs";
-    html+=`<div class="nav-active-month">Viewing: <span>${active}${isGs?" ◆":""}</span></div>`;
-  }
+  const html=years.map(yr=>`
+    <div class="nav-item">
+      <button class="nav-btn${activeYear===yr?' active':''}" onclick="selectYear('${yr}')">20${yr}</button>
+    </div>`).join('');
   wrap.innerHTML=html;
-}
-function selectAll(){ active="ALL"; activeYear="ALL"; buildNav(); renderAll("ALL"); }
-function selectMonth(month,yr){ active=month; activeYear=yr; buildNav(); renderAll(month); }
 
-// ── MANAGE MODAL ──
+  // For 2026+, render month sub-tabs below
+  const subWrap=document.getElementById('monthSubTabs');
+  const isNew=parseInt(activeYear)>=26;
+  if(isNew){
+    const months=getMonthsForYear(activeYear);
+    let tabs=`<button class="sub-tab${active==='ALL'?' active':''}" onclick="selectMonthTab('ALL')">Summary</button>`;
+    tabs+=months.map(m=>`<button class="sub-tab${active===m?' active':''}" onclick="selectMonthTab('${m}')">${m}</button>`).join('');
+    subWrap.innerHTML=tabs;
+    subWrap.style.display='flex';
+  } else {
+    subWrap.innerHTML='';
+    subWrap.style.display='none';
+  }
+}
+function selectYear(yr){
+  activeYear=yr;
+  active='ALL';
+  buildNav();
+  renderAll('ALL');
+}
+function selectMonthTab(m){
+  active=m;
+  buildNav();
+  renderAll(m);
+}
+
+// ═══════════════════════════════════════════════════
+// ENTRY MODAL — unified for Add AND Edit
+// ═══════════════════════════════════════════════════
+let _rowId=0, _editMonth=null;
+
+function openEntryModal(editMonth){
+  _editMonth=editMonth;
+  _rowId=0;
+  document.getElementById('entryTitle').textContent=editMonth?`Edit — ${editMonth}`:'New month';
+  const mInput=document.getElementById('eMonth');
+  // Init or pre-fill picker
+  if(!editMonth){
+    initPicker();
+    document.getElementById('monthPicker').style.display='block';
+  } else {
+    document.getElementById('monthPicker').style.display='none';
+    mInput.value=editMonth||'';
+  }
+  mInput.disabled=!!editMonth;
+
+  if(editMonth&&RAW[editMonth]){
+    const d=RAW[editMonth];
+  
+    // Reconstruct rows from saved data
+    // We have: investUsd (= qty * price at entry time), v (= return), qty, token
+    // price = investUsd / qty; lastMonth = investUsd - v
+    document.getElementById('eRows').innerHTML='';
+    const merged={};
+    d.rows.forEach(r=>{
+      if(!merged[r.p])merged[r.p]={v:0,qty:r.qty,token:r.token,investUsd:0};
+      merged[r.p].v+=r.v;
+      merged[r.p].investUsd+=(r.investUsd||0);
+    });
+    Object.entries(merged).forEach(([p,data])=>{
+      const qty=data.qty||0;
+      const price=qty>0?data.investUsd/qty:0;
+      const lastMonth=data.investUsd-data.v; // reverse-calc: current value - return = last month value
+      addEntryRow(p,qty,data.token||'',price||'',lastMonth>0?Math.round(lastMonth):'');
+    });
+  } else {
+  
+    document.getElementById('eRows').innerHTML='';
+    addEntryRow();
+  }
+
+  updateEntryTotals();
+  document.getElementById('entryOverlay').classList.add('open');
+}
+function closeEntry(){document.getElementById('entryOverlay').classList.remove('open');_editMonth=null;}
+
+
+function addEntryRow(name='',qty='',token='',price='',lastMonth=''){
+  const id=++_rowId;
+  const div=document.createElement('div');div.className='proto-entry';div.id='er_'+id;
+  div.innerHTML=`
+    <div class="proto-entry-grid">
+      <div>
+        <div class="form-label" style="margin-bottom:3px">Protocol</div>
+        <input class="form-input er-name" placeholder="e.g. Kamino" value="${name}" oninput="updateEntryTotals()"/>
+      </div>
+      <div>
+        <div class="form-label" style="margin-bottom:3px">Token qty</div>
+        <input class="form-input er-qty" type="number" step="any" placeholder="e.g. 1732" value="${qty}" oninput="updateEntryTotals()"/>
+      </div>
+      <div>
+        <div class="form-label" style="margin-bottom:3px">Symbol</div>
+        <input class="form-input er-token" placeholder="e.g. JLP" value="${token}" oninput="updateEntryTotals()"/>
+      </div>
+      <div>
+        <div class="form-label" style="margin-bottom:3px">Price ($)</div>
+        <input class="form-input er-price" type="number" step="any" placeholder="e.g. 4.72" value="${price}" oninput="updateEntryTotals()"/>
+      </div>
+      <div>
+        <div class="form-label" style="margin-bottom:3px">Last month ($)</div>
+        <input class="form-input er-last" type="number" step="any" placeholder="e.g. 8500" value="${lastMonth}" oninput="updateEntryTotals()"/>
+      </div>
+      <button class="remove-btn" onclick="document.getElementById('er_${id}').remove();updateEntryTotals()">×</button>
+    </div>
+    <div class="calc-row" id="calcs_${id}"></div>`;
+  document.getElementById('eRows').appendChild(div);
+}
+
+function updateEntryTotals(){
+  let totalInvest=0,totalReturn=0;
+  document.querySelectorAll('.proto-entry').forEach(div=>{
+    const qty=parseFloat(div.querySelector('.er-qty')?.value)||0;
+    const price=parseFloat(div.querySelector('.er-price')?.value)||0;
+    const last=parseFloat(div.querySelector('.er-last')?.value)||0;
+    const invest=qty*price;
+    const ret=invest-last;
+    totalInvest+=invest;
+    totalReturn+=ret;
+    const id=div.id.split('_')[1];
+    const calcsEl=document.getElementById('calcs_'+id);
+    if(calcsEl&&price>0){
+      const apr=invest>0?calcAPR(ret,invest):null;
+      calcsEl.innerHTML=`
+        <span class="calc-chip">Invested: <b>${fmt(invest)}</b></span>
+        <span class="calc-chip">Return: <b class="${ret>=0?'pos':'neg'}">${last>0||invest>0?fmt(ret):'—'}</b></span>
+        <span class="calc-chip">APR: <b class="${apr!=null&&apr>=0?'pos':'neg'}">${apr!=null&&last>0?fmtPct(apr):'—'}</b></span>`;
+    } else if(calcsEl) calcsEl.innerHTML='';
+  });
+  const apr=totalInvest>0?calcAPR(totalReturn,totalInvest):null;
+  const iEl=document.getElementById('eTotalInvest');
+  const rEl=document.getElementById('eTotalReturn');
+  const aEl=document.getElementById('eTotalAPR');
+  iEl.textContent=fmt(totalInvest);iEl.className='total-val neu';
+  rEl.textContent=fmt(totalReturn);rEl.className='total-val '+(totalReturn>=0?'pos':'neg');
+  aEl.textContent=apr!=null?fmtPct(apr):'—';aEl.className='total-val '+(apr!=null?(apr>=0?'pos':'neg'):'neu');
+}
+
+function saveEntry(){
+  const monthName=(document.getElementById('eMonth').value||'').trim().toUpperCase();
+  const source='dashboard';
+  if(!monthName){showToast('Please enter a month name','error');return;}
+  const rows=[];let total=0;
+  document.querySelectorAll('.proto-entry').forEach(div=>{
+    const p=div.querySelector('.er-name').value.trim();
+    const qty=parseFloat(div.querySelector('.er-qty').value)||0;
+    const token=div.querySelector('.er-token').value.trim();
+    const price=parseFloat(div.querySelector('.er-price').value)||0;
+    const last=parseFloat(div.querySelector('.er-last').value)||0;
+    if(!p)return;
+    const investUsd=Math.round(qty*price*100)/100;
+    const v=Math.round((investUsd-last)*100)/100;
+    rows.push({p,v,qty:qty||null,token:token||null,investUsd});
+    total+=v;
+  });
+  if(rows.length===0){showToast('Add at least one protocol','error');return;}
+  RAW[monthName]={total:Math.round(total*100)/100,source,rows};
+  activeYear=getYear(monthName);active='ALL';
+  saveData();buildNav();renderAll('ALL');
+  closeEntry();
+  showToast(`${monthName} ${_editMonth?'updated':'saved'} ✓`,'success');
+}
+
+// ═══════════════════════════════════════════════════
+// MANAGE MODAL
+// ═══════════════════════════════════════════════════
 function openManageModal(){
   document.getElementById('manageList').innerHTML=getMonths().map(m=>{
     const d=RAW[m];
-    return `<div class="month-manage-row">
-      <span class="month-manage-name">${m}</span>
-      <span class="month-manage-total ${d.total>=0?'pos':'neg'}">${fmt(d.total)}</span>
-      <span class="src-badge ${d.source==='gs'?'src-gs':'src-xl'}">${d.source==='gs'?'◆ Sheets':'▪ Excel'}</span>
-      <button class="btn" style="padding:4px 10px;font-size:11px" onclick="closeManageModal();handleEditMonth('${m}')">Edit</button>
+    return `<div class="manage-row">
+      <span class="manage-name">${m}</span>
+      <span class="${d.total>=0?'pos':'neg'}" style="font-family:var(--font-mono);font-size:13px;min-width:80px;text-align:right">${fmt(d.total)}</span>
+
+      <button class="btn" style="padding:4px 10px;font-size:11px" onclick="closeManage();openEntryModal('${m}')">Edit</button>
       <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteMonth('${m}')">Delete</button>
     </div>`;
   }).join('');
   document.getElementById('manageOverlay').classList.add('open');
 }
-function closeManageModal(){document.getElementById('manageOverlay').classList.remove('open');}
+function closeManage(){document.getElementById('manageOverlay').classList.remove('open');}
 function deleteMonth(month){
   if(!confirm(`Delete ${month}?`))return;
-  delete RAW[month];if(active===month)active='ALL';
+  delete RAW[month];active='ALL';
   saveData();buildNav();renderAll(active);openManageModal();
   showToast(`${month} deleted`,'success');
 }
 function exportJSON(){
-  const blob=new Blob([JSON.stringify(RAW,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='crypto_returns.json';a.click();
+  const b=new Blob([JSON.stringify(RAW,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='crypto_returns.json';a.click();
   showToast('JSON exported ✓','success');
 }
+
 function showToast(msg,type='success'){
   const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;
-  setTimeout(()=>t.classList.remove('show'),2800);
-}
-document.getElementById('addOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAddModal();});
-document.getElementById('manageOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeManageModal();});
-
-
-// ── SMART ENTRY MODAL ──
-let entryRowCount = 0;
-
-function openEntryModal(editMonth=null){
-  entryRowCount = 0;
-  const monthInput = document.getElementById('entryMonth');
-  const sourceEl   = document.querySelector('#entryOverlay .form-select');
-  const xlInput    = document.getElementById('entryXlTotal');
-
-  monthInput.value    = editMonth || '';
-  monthInput.disabled = !!editMonth;
-  document.getElementById('entryRows').innerHTML = '';
-
-  if(editMonth && RAW[editMonth]){
-    const d = RAW[editMonth];
-    if(sourceEl) sourceEl.value = d.source;
-    xlInput.value = d.xlTotal || '';
-    document.getElementById('entryConflictGroup').style.display = d.source==='gs' ? 'block' : 'none';
-    // Pre-fill rows from saved data
-    // For each saved row we know: p, qty, token, investUsd, v (return)
-    // We back-calculate lastMonthValue = currentValue - return = investUsd - v
-    // (investUsd IS current value since we store qty*price at entry time)
-    const merged = {};
-    d.rows.forEach(r => {
-      if(!merged[r.p]) merged[r.p] = {v:0, qty:r.qty, token:r.token, investUsd:0};
-      merged[r.p].v += r.v;
-      merged[r.p].investUsd += (r.investUsd||0);
-    });
-    Object.entries(merged).forEach(([p, data]) => {
-      // price = investUsd / qty (reconstruct); lastMonth = investUsd - return
-      const qty   = data.qty   || 0;
-      const price = qty > 0 ? (data.investUsd / qty) : 0;
-      const lastMonthVal = data.investUsd - data.v;  // reverse-calc
-      addEntryRow(p, qty, data.token, price > 0 ? price : '', lastMonthVal > 0 ? lastMonthVal : '');
-    });
-  } else {
-    if(sourceEl) sourceEl.value = 'xl';
-    xlInput.value = '';
-    document.getElementById('entryConflictGroup').style.display = 'none';
-    addEntryRow(); // blank row
-  }
-
-  // Update modal title
-  document.querySelector('#entryOverlay .modal-title').textContent =
-    editMonth ? `Edit — ${editMonth}` : 'Enter monthly data';
-
-  updateEntryTotals();
-  document.getElementById('entryOverlay').classList.add('open');
-}
-function closeEntryModal(){ document.getElementById('entryOverlay').classList.remove('open'); }
-
-document.getElementById('entryOverlay').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeEntryModal(); });
-
-// source select in entry modal — different id from main modal
-document.addEventListener('change', e=>{
-  if(e.target && e.target.id === 'entrySourceSelect'){
-    document.getElementById('entryConflictGroup').style.display = e.target.value === 'gs' ? 'block' : 'none';
-  }
-});
-
-function addEntryRow(name='', qty='', token='', price='', added=''){
-  const id = ++entryRowCount;
-  const div = document.createElement('div');
-  div.className = 'proto-row-entry';
-  div.id = 'entryRow_' + id;
-  div.innerHTML = `
-    <button class="remove-entry-btn" onclick="document.getElementById('entryRow_${id}').remove();updateEntryTotals()">×</button>
-    <div class="proto-row-inline">
-      <div>
-        <div class="proto-entry-label">Protocol name</div>
-        <input class="form-input er-name" placeholder="e.g. Kamino" value="${name}" oninput="updateEntryTotals()"/>
-      </div>
-      <div>
-        <div class="proto-entry-label">Token amount</div>
-        <input class="form-input er-qty" type="number" step="any" placeholder="e.g. 1732" value="${qty}" oninput="updateEntryTotals()"/>
-      </div>
-      <div>
-        <div class="proto-entry-label">Symbol</div>
-        <input class="form-input er-token" placeholder="e.g. JLP" value="${token}" oninput="updateEntryTotals()"/>
-      </div>
-      <div>
-        <div class="proto-entry-label">Price ($)</div>
-        <input class="form-input er-price" type="number" step="any" placeholder="e.g. 4.72" value="${price}" oninput="updateEntryTotals()"/>
-      </div>
-    </div>
-    <div style="margin-top:10px">
-      <div class="proto-entry-label">Value last month ($)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-        <input class="form-input er-added" type="number" step="any" placeholder="e.g. 8500 (last month $)" value="${added}" oninput="updateEntryTotals()"/>
-        <div class="proto-row-calcs" id="calcs_${id}" style="margin:0;padding:0;border:none;align-items:center"></div>
-      </div>
-    </div>`;
-  document.getElementById('entryRows').appendChild(div);
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-function getEntryRows(){
-  return [...document.querySelectorAll('.proto-row-entry')].map(div => ({
-    name:  div.querySelector('.er-name')?.value.trim() || '',
-    qty:   parseFloat(div.querySelector('.er-qty')?.value) || 0,
-    token: div.querySelector('.er-token')?.value.trim() || '',
-    price: parseFloat(div.querySelector('.er-price')?.value) || 0,
-    added: parseFloat(div.querySelector('.er-added')?.value) || 0,
-    id:    div.id.split('_')[1]
-  }));
+document.getElementById('entryOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEntry();});
+document.getElementById('manageOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeManage();});
+
+
+// ── MONTH/YEAR PICKER ──
+const MONTH_NAMES=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+let _pickerYear=2026, _pickerMonth=null;
+
+function initPicker(){
+  _pickerYear=2026; _pickerMonth=null;
+  document.getElementById('pickerYear').textContent=_pickerYear;
+  document.getElementById('eMonth').value='';
+  renderPicker();
+}
+function renderPicker(){
+  const grid=document.getElementById('pickerMonths');
+  grid.innerHTML=MONTH_NAMES.map((m,i)=>{
+    const key=m+' '+String(_pickerYear).slice(-2);
+    const isSel=_pickerMonth===i;
+    const exists=!!RAW[key];
+    return `<button type="button" class="picker-month${isSel?' selected':''}" onclick="selectPickerMonth(${i})" ${exists?'style="opacity:0.4;font-style:italic"':''} title="${exists?key+' (exists)':key}">${m}</button>`;
+  }).join('');
+}
+function pickerPrevYear(){ _pickerYear--; _pickerMonth=null; document.getElementById('pickerYear').textContent=_pickerYear; document.getElementById('eMonth').value=''; renderPicker(); }
+function pickerNextYear(){ _pickerYear++; _pickerMonth=null; document.getElementById('pickerYear').textContent=_pickerYear; document.getElementById('eMonth').value=''; renderPicker(); }
+function selectPickerMonth(idx){
+  _pickerMonth=idx;
+  const key=MONTH_NAMES[idx]+' '+String(_pickerYear).slice(-2);
+  document.getElementById('eMonth').value=key;
+  renderPicker();
 }
 
-function updateEntryTotals(){
-  const rows = getEntryRows();
-  let totalInvest = 0, totalReturn = 0;
-
-  rows.forEach(r => {
-    const invest   = r.qty * r.price;           // current value
-    const lastMonth = r.added;                  // value last month (user input)
-    const ret      = invest - lastMonth;         // profit = current - last month
-    totalInvest += invest;
-    totalReturn += ret;
-
-    // update per-row calcs
-    const calcsEl = document.getElementById('calcs_' + r.id);
-    if(calcsEl){
-      const apr = invest > 0 ? ((ret * 12) / invest * 100) : null;
-      calcsEl.innerHTML = `
-        <div class="calc-chip">Current value: <span>${r.qty && r.price ? fmt(invest) : '—'}</span></div>
-        <div class="calc-chip">Profit: <span class="${ret>=0?'pos':'neg'}">${r.price && r.added > 0 ? fmt(ret) : '—'}</span></div>
-        <div class="calc-chip">APR: <span class="${apr!=null&&apr>=0?'pos':'neg'}">${apr !== null && r.price && r.added > 0 ? fmtPct(apr) : '—'}</span></div>`;
-    }
-  });
-
-  const portfolioAPR = totalInvest > 0 ? ((totalReturn * 12) / totalInvest * 100) : null;
-
-  const invEl = document.getElementById('totalInvestedPreview');
-  const retEl = document.getElementById('totalReturnPreview');
-  const aprEl = document.getElementById('totalAPRPreview');
-
-  invEl.textContent = fmt(totalInvest);
-  invEl.className = 'month-total-val neu';
-  retEl.textContent = fmt(totalReturn);
-  retEl.className = 'month-total-val ' + (totalReturn >= 0 ? 'pos' : 'neg');
-  aprEl.textContent = portfolioAPR !== null ? fmtPct(portfolioAPR) : '—';
-  aprEl.className = 'month-total-val ' + (portfolioAPR !== null ? (portfolioAPR >= 0 ? 'pos' : 'neg') : 'neu');
-}
-
-
-// ── CLASSIC EDIT MODAL (2024 / 2025 months) ──
-let editingMonth = null;
-function openAddModal(editMonth=null){
-  editingMonth = editMonth;
-  document.getElementById('modalTitle').textContent = editMonth ? `Edit — ${editMonth}` : 'Edit month';
-  document.getElementById('inputMonth').value = editMonth || '';
-  document.getElementById('inputMonth').disabled = !!editMonth;
-  document.getElementById('inputSource').value = editMonth ? RAW[editMonth].source : 'xl';
-  document.getElementById('inputXlTotal').value = editMonth && RAW[editMonth].xlTotal ? RAW[editMonth].xlTotal : '';
-  const entries = document.getElementById('protoEntries');
-  entries.innerHTML = '';
-  const initRows = editMonth ? RAW[editMonth].rows : [{p:'',v:0,qty:'',token:'',investUsd:''}];
-  const merged = {};
-  initRows.forEach(r => {
-    if(!merged[r.p]) merged[r.p] = {v:0, qty:r.qty, token:r.token, investUsd:r.investUsd||0};
-    merged[r.p].v += r.v;
-    if(r.investUsd) merged[r.p].investUsd += r.investUsd;
-  });
-  Object.entries(merged).forEach(([p,d]) => addProtoRow(p, d.v, d.qty, d.token, d.investUsd));
-  toggleConflictGroup(); updateTotalPreview();
-  document.getElementById('addOverlay').classList.add('open');
-}
-function closeAddModal(){ document.getElementById('addOverlay').classList.remove('open'); editingMonth = null; }
-function toggleConflictGroup(){
-  document.getElementById('conflictGroup').style.display = document.getElementById('inputSource').value === 'gs' ? 'block' : 'none';
-}
-document.getElementById('inputSource').addEventListener('change', toggleConflictGroup);
-
-function addProtoRow(name='', returnVal=0, qty='', token='', investUsd=''){
-  const list = document.getElementById('protoEntries');
-  const div = document.createElement('div'); div.className = 'proto-entry-card';
-  div.innerHTML = `
-    <button class="remove-entry-btn" onclick="this.parentElement.remove();updateTotalPreview()">×</button>
-    <div class="proto-entry-grid" style="margin-bottom:8px">
-      <div><div class="proto-entry-label">Protocol name</div><input class="form-input proto-name-in" placeholder="e.g. Kamino" value="${name}"/></div>
-      <div><div class="proto-entry-label">Monthly return ($)</div><input class="form-input proto-ret-in" type="number" step="0.01" placeholder="e.g. 350" value="${returnVal}"/></div>
-    </div>
-    <div class="proto-entry-grid-3">
-      <div><div class="proto-entry-label">Token amount</div><input class="form-input proto-qty-in" placeholder="e.g. 1732" value="${qty||''}"/></div>
-      <div><div class="proto-entry-label">Token symbol</div><input class="form-input proto-tok-in" placeholder="e.g. JLP" value="${token||''}"/></div>
-      <div><div class="proto-entry-label">Invested ($)</div><input class="form-input proto-inv-in" type="number" step="1" placeholder="e.g. 9387" value="${investUsd||''}"/></div>
-    </div>`;
-  div.querySelector('.proto-ret-in').addEventListener('input', updateTotalPreview);
-  list.appendChild(div);
-}
-function updateTotalPreview(){
-  let total = 0; document.querySelectorAll('.proto-ret-in').forEach(i => { total += parseFloat(i.value)||0; });
-  const el = document.getElementById('totalPreview'); el.textContent = fmt(total); el.className = 'total-num ' + (total>=0?'pos':'neg');
-}
-function saveMonth(){
-  const monthName = (document.getElementById('inputMonth').value||'').trim().toUpperCase();
-  const source    = document.getElementById('inputSource').value;
-  const xlTotal   = parseFloat(document.getElementById('inputXlTotal').value)||null;
-  if(!monthName){ showToast('Please enter a month name','error'); return; }
-  const rows = []; let total = 0;
-  document.querySelectorAll('.proto-entry-card').forEach(card => {
-    const p        = card.querySelector('.proto-name-in').value.trim();
-    const v        = parseFloat(card.querySelector('.proto-ret-in').value)||0;
-    const qty      = card.querySelector('.proto-qty-in').value.trim();
-    const token    = card.querySelector('.proto-tok-in').value.trim();
-    const investUsd = parseFloat(card.querySelector('.proto-inv-in').value)||0;
-    if(p){ rows.push({p, v, qty:qty||null, token:token||null, investUsd}); total += v; }
-  });
-  if(rows.length===0){ showToast('Add at least one protocol','error'); return; }
-  const conflict = source==='gs' && xlTotal!==null && !isNaN(xlTotal);
-  RAW[monthName] = {total:Math.round(total*100)/100, source, rows, ...(conflict?{xlTotal,conflict:true}:{})};
-  activeYear = getYear(monthName); active = monthName;
-  saveData(); buildNav(); renderAll(active);
-  closeAddModal(); showToast(`${monthName} ${editingMonth?'updated':'saved'} ✓`,'success');
-}
-document.getElementById('addOverlay').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeAddModal(); });
-
-// Route edit: smart entry for 2026+, classic modal for older months
-function handleEditMonth(month){
-  const yr = getYear(month); // "24", "25", "26"...
-  if(parseInt(yr) >= 26){
-    openEntryModal(month);
-  } else {
-    openAddModal(month);
-  }
-}
-function saveEntryMonth(){
-  const monthName  = (document.getElementById('entryMonth').value || '').trim().toUpperCase();
-  const isEdit     = !!document.getElementById('entryMonth').disabled;
-  const sourceEl   = document.querySelector('#entryOverlay .form-select');
-  const source     = sourceEl ? sourceEl.value : 'xl';
-  const xlTotal    = parseFloat(document.getElementById('entryXlTotal').value) || null;
-
-  if(!monthName){ showToast('Please enter a month name', 'error'); return; }
-
-  const rows = getEntryRows();
-  const validRows = rows.filter(r => r.name && r.price > 0);
-  if(validRows.length === 0){ showToast('Add at least one protocol with a price', 'error'); return; }
-
-  // Build RAW rows from smart entry
-  const rawRows = validRows.map(r => ({
-    p:         r.name,
-    v:         Math.round((r.qty * r.price - r.added) * 100) / 100,  // return = current - last month
-    qty:       r.qty || null,
-    token:     r.token || null,
-    investUsd: Math.round(r.qty * r.price * 100) / 100
-  }));
-
-  const total = rawRows.reduce((s, r) => s + r.v, 0);
-  const conflict = source === 'gs' && xlTotal !== null && !isNaN(xlTotal);
-
-  RAW[monthName] = {
-    total: Math.round(total * 100) / 100,
-    source,
-    rows: rawRows,
-    ...(conflict ? { xlTotal, conflict: true } : {})
-  };
-
-  saveData();
-  activeYear = getYear(monthName);
-  active = monthName;
-  buildNav();
-  renderAll(active);
-  closeEntryModal();
-  showToast(`${monthName} ${isEdit?'updated':'saved'} — invested ${fmt(rawRows.reduce((s,r)=>s+(r.investUsd||0),0))}, return ${fmt(total)} ✓`, 'success');
-}
-
-loadData();buildNav();renderAll('ALL');
+loadData();activeYear=getYears().slice(-1)[0]||'ALL';buildNav();renderAll('ALL');
 </script>
 </body>
 </html>
