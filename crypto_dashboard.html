@@ -146,23 +146,16 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
 .sub-tab:hover{border-color:var(--border2);color:var(--text)}
 .sub-tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}
 
-.picker-month{padding:6px 4px;background:transparent;border:1px solid var(--border);border-radius:6px;font-family:var(--font-mono);font-size:11px;cursor:pointer;color:var(--muted);transition:all .12s;text-align:center}
-.picker-month:hover{border-color:var(--border2);color:var(--text);background:var(--bg4)}
-.picker-month.selected{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
-
-.price-card-token{font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
-.price-card-val{font-size:22px;font-weight:600;font-family:var(--font-mono);letter-spacing:-0.5px;margin-bottom:4px}
-.price-card-change{font-size:12px;font-family:var(--font-mono)}
-.price-card-name{font-size:10px;color:var(--muted);font-family:var(--font-mono);margin-top:4px}
-
-.mini-chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
-.mini-chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:border-color .15s}
-.mini-chart-card:hover{border-color:var(--border2)}
-.mini-chart-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-.mini-chart-sym{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--text)}
-.mini-chart-chg{font-family:var(--font-mono);font-size:10px}
-.mini-chart-price{font-family:var(--font-mono);font-size:15px;font-weight:600;margin-bottom:4px}
-.mini-chart-name{font-family:var(--font-mono);font-size:9px;color:var(--muted)}
+.pcrd{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;cursor:pointer;transition:border-color .15s}
+.pcrd:hover{border-color:var(--border2)}
+.pcrd-sym{font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px}
+.pcrd-price{font-size:17px;font-weight:600;font-family:var(--font-mono)}
+.pcrd-chg{font-size:11px;font-family:var(--font-mono);margin-top:3px}
+.pcrd-name{font-size:9px;color:var(--muted);font-family:var(--font-mono);margin-top:2px}
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.scard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.scard-sym{font-family:var(--font-mono);font-size:12px;font-weight:600}
+.scard-chg{font-family:var(--font-mono);font-size:11px}
 </style>
 </head>
 <body>
@@ -180,8 +173,6 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
 
 <main>
   <div class="kpi-grid" id="kpiGrid"></div>
-  <!-- Mini price charts shown on home screen -->
-  <div id="miniChartsSection" style="margin-bottom:20px"></div>
   <div class="nav-bar" id="navBar"></div>
   <div id="monthSubTabs" style="display:none;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)"></div>
 
@@ -196,65 +187,25 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
         <span class="chart-title">Protocol breakdown</span>
         <span style="font-size:10px;font-family:var(--font-mono);color:var(--muted)">hover for details</span>
       </div>
-      <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
-        <!-- Gains pie -->
-        <div style="flex:1;text-align:center">
-          <div style="font-size:9px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px">Gains</div>
-          <div style="position:relative;height:160px">
-            <canvas id="pieChart"></canvas>
-            <div id="pieCenter" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
-              <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Total</div>
-              <div id="pieCenterVal" style="font-size:15px;font-family:var(--font-mono);font-weight:600;color:var(--green)">$0</div>
-            </div>
-          </div>
-        </div>
-        <!-- Losses pie (hidden if no losses) -->
-        <div id="lossPieWrap" style="flex:1;text-align:center;display:none">
-          <div style="font-size:9px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px">Losses</div>
-          <div style="position:relative;height:160px">
-            <canvas id="lossPieChart"></canvas>
-            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
-              <div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Total</div>
-              <div id="lossPieCenterVal" style="font-size:15px;font-family:var(--font-mono);font-weight:600;color:var(--red)">$0</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div style="position:relative;height:180px;margin-bottom:16px"><canvas id="pieChart"></canvas></div>
       <div id="protoTableWrap" style="overflow-x:auto"></div>
     </div>
   </div>
 
-<!-- ── LIVE PRICES PAGE ── -->
-<div id="pricesPage" style="display:none">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-    <div style="display:flex;align-items:center;gap:12px">
-      <button class="btn" onclick="hidePricesPage()">← Back</button>
-      <span style="font-family:var(--font-mono);font-size:13px;color:var(--muted)" id="pricesLastUpdate"></span>
-    </div>
-    <button class="btn" onclick="fetchPrices()" id="refreshBtn">↻ Refresh</button>
-  </div>
-
-  <!-- Price cards grid -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:28px" id="priceCards">
-    <div class="kpi" style="text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:12px;grid-column:1/-1;padding:28px">
-      Loading live prices...<br>
-      <span style="font-size:10px;margin-top:6px;display:block">Live prices work on GitHub Pages — if running locally, click Refresh</span>
-    </div>
-  </div>
-
-  <!-- Chart area -->
-  <div class="chart-card" id="priceChartCard" style="display:none">
-    <div class="chart-header">
-      <span class="chart-title" id="priceChartTitle">Price chart</span>
-      <div style="display:flex;gap:6px">
-        <button class="sub-tab active" onclick="setPriceRange(7,this)">7D</button>
-        <button class="sub-tab" onclick="setPriceRange(30,this)">30D</button>
-        <button class="sub-tab" onclick="setPriceRange(90,this)">90D</button>
+  <!-- HOME PRICES SECTION — shown by default -->
+  <div id="homePrices" style="margin-bottom:28px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <span style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Live prices — 30d change</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="priceTimestamp" style="font-family:var(--font-mono);font-size:10px;color:var(--muted2)"></span>
+        <button class="btn" id="refreshPricesBtn" onclick="loadPrices()" style="padding:4px 12px;font-size:11px">↻ Refresh</button>
       </div>
     </div>
-    <div style="position:relative;height:260px"><canvas id="priceChart"></canvas></div>
+    <div id="priceCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px">
+      <div style="grid-column:1/-1;text-align:center;padding:16px;font-family:var(--font-mono);font-size:12px;color:var(--muted)">Loading prices...</div>
+    </div>
+    <div id="sparklineGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px"></div>
   </div>
-</div>
 
 </main>
 
@@ -277,18 +228,8 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
       <!-- Month + Source row -->
       <div class="form-row-2">
         <div>
-          <label class="form-label">Month &amp; year</label>
-          <div id="monthPicker" style="background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:12px">
-            <!-- Year row -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-              <button type="button" onclick="pickerPrevYear()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 6px">‹</button>
-              <span id="pickerYear" style="font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--text)">2026</span>
-              <button type="button" onclick="pickerNextYear()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 6px">›</button>
-            </div>
-            <!-- Month grid -->
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px" id="pickerMonths"></div>
-          </div>
-          <input type="hidden" id="eMonth"/>
+          <label class="form-label">Month name</label>
+          <input class="form-input" id="eMonth" placeholder="e.g. FEB 26"/>
         </div>
 
       </div>
@@ -372,26 +313,10 @@ const DEFAULT = {
   "SEP 25":{total:806,source:"xl",rows:[{p:"TRX Bot",v:148,qty:73439,token:"TRX",investUsd:25035},{p:"Kamino",v:504,qty:1732,token:"JLP",investUsd:9387},{p:"Aerodrome",v:39,qty:0.18622,token:"AERO",investUsd:525},{p:"Cetus",v:13,qty:8266,token:"CETUS+SUI",investUsd:1613},{p:"DOT Staking",v:23,qty:748.86,token:"DOT",investUsd:2898},{p:"NEAR Staking",v:16,qty:1711.7,token:"NEAR",investUsd:4190},{p:"MGX Staking",v:21,qty:319.27,token:"GMX",investUsd:0},{p:"USDC Autopilot",v:42,qty:6009,token:"USDC",investUsd:6009}]},
   "OCT 25":{total:593,source:"xl",rows:[{p:"TRX Bot",v:44,qty:23423,token:"TRX",investUsd:6825},{p:"Kamino",v:365,qty:1796.25,token:"JLP",investUsd:10239},{p:"Cetus",v:-10,qty:14741,token:"CETUS+SUI",investUsd:1520},{p:"DOT Staking",v:39,qty:769.77,token:"DOT",investUsd:2186},{p:"NEAR Staking",v:13,qty:1719.32,token:"NEAR",investUsd:4814},{p:"AERO Staking",v:41,qty:2598,token:"USDC",investUsd:2598},{p:"MGX Staking",v:59,qty:319.27,token:"GMX",investUsd:4974},{p:"SideShift",v:2,qty:2347,token:"XAI",investUsd:369},{p:"USDC Autopilot",v:40,qty:6040,token:"USDC",investUsd:6040}]},
   "NOV 25":{total:-941,source:"gs",xlTotal:371,conflict:true,rows:[{p:"TRX Bot",v:47,qty:23740,token:"TRX",investUsd:6647},{p:"Kamino",v:-1194,qty:1538,token:"JLP",investUsd:7259},{p:"Cetus",v:9,qty:650,token:"CETUS+SUI",investUsd:1003},{p:"DOT Staking",v:13,qty:775,token:"DOT",investUsd:1783},{p:"AERO Staking",v:131,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:48,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:4,qty:9400,token:"PYTH",investUsd:705}]},
-  "DEC 25":{total:47,source:"gs",conflict:false,rows:[{p:"TRX Bot",v:89,qty:25310,token:"TRX",investUsd:7216},{p:"Kamino",v:-174,qty:1538,token:"JLP",investUsd:7059},{p:"DOT Staking",v:14,qty:775,token:"DOT",investUsd:1550},{p:"AERO Staking",v:80,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:39,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:0,qty:26000,token:"PYTH",investUsd:1602}]},
-  "MAR 26":{total:81,source:"dashboard",rows:[
-    {p:"TRX Bot",v:37,qty:26599.78,token:"TRX",investUsd:8762},
-    {p:"Kamino x 2.5",v:241,qty:1262,token:"JLP",investUsd:4914},
-    {p:"Kamino x 2.5 #2",v:-231,qty:940.1164,token:"JLP",investUsd:3661},
-    {p:"PYTH",v:22,qty:26639,token:"PYTH",investUsd:1219},
-    {p:"GMX Staking",v:12,qty:345.21,token:"GMX",investUsd:2312}
-  ]}
+  "DEC 25":{total:47,source:"gs",conflict:false,rows:[{p:"TRX Bot",v:89,qty:25310,token:"TRX",investUsd:7216},{p:"Kamino",v:-174,qty:1538,token:"JLP",investUsd:7059},{p:"DOT Staking",v:14,qty:775,token:"DOT",investUsd:1550},{p:"AERO Staking",v:80,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:39,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:0,qty:26000,token:"PYTH",investUsd:1602}]},"MAR 26":{total:81,source:"dashboard",rows:[{p:"TRX Bot",v:37,qty:26599.78,token:"TRX",investUsd:8762},{p:"Kamino x 2.5",v:241,qty:1262,token:"JLP",investUsd:4914},{p:"Kamino x 2.5 #2",v:-231,qty:940.1164,token:"JLP",investUsd:3661},{p:"PYTH",v:22,qty:26639,token:"PYTH",investUsd:1219},{p:"GMX Staking",v:12,qty:345.21,token:"GMX",investUsd:2312}]}
 };
 
 const COLORS={"Kamino":"#3b82f6","TRX Bot":"#22c55e","Binance":"#f59e0b","Ref Finance":"#ef4444","SyncSwap":"#8b5cf6","Sanctum":"#d97706","BlockCentral":"#ec4899","Aerodrome":"#84cc16","Cetus":"#06b6d4","Meridian":"#f87171","DOT Staking":"#4ade80","NEAR Staking":"#fde68a","Fuel":"#c084fc","Mode":"#60a5fa","USDC Autopilot":"#2dd4bf","MGX Staking":"#fb923c","Kamino Airdrop":"#93c5fd","AERO Staking":"#64748b","GMX Staking":"#67e8f9","PYTH":"#a3e635","SideShift":"#94a3b8","Kamino x 2.5":"#60a5fa","Kamino x 2.5 #2":"#f87171"};
-
-const PROTO_LINKS = {
-  "AERO Staking": "https://theautopilot.xyz/app/aero",
-  "Aerodrome":    "https://theautopilot.xyz/app/aero",
-  "Kamino":       "https://kamino.finance/multiply",
-  "PYTH":         "https://staking.pyth.network/",
-  "GMX Staking":  "https://app.gmx.io/#/stake",
-  "MGX Staking":  "https://app.gmx.io/#/stake"
-};
 const COLOR_POOL=["#3b82f6","#22c55e","#f59e0b","#ef4444","#8b5cf6","#d97706","#ec4899","#84cc16","#06b6d4","#f87171","#4ade80","#fde68a","#c084fc","#60a5fa","#2dd4bf","#fb923c","#93c5fd","#64748b","#67e8f9","#a3e635","#94a3b8"];
 let _ci=0;
 const gc=p=>{if(!COLORS[p]){COLORS[p]=COLOR_POOL[_ci%COLOR_POOL.length];_ci++;}return COLORS[p];};
@@ -493,40 +418,20 @@ function renderBar(month){
   });
 }
 
-let lossPieChart=null;
 function renderProtoTable(month){
   if(pieChart)pieChart.destroy();
-  if(lossPieChart)lossPieChart.destroy();
   const months=getMonthsForYear(activeYear);
   let aggd={};
   if(month==='ALL'){months.forEach(m=>{const a=aggRows(RAW[m].rows);Object.entries(a).forEach(([p,d])=>{if(!aggd[p])aggd[p]={v:0,investUsd:0,token:d.token,qty:d.qty};aggd[p].v+=d.v;aggd[p].investUsd+=d.investUsd||0;});});}
   else aggd=aggRows(RAW[month].rows);
   const sorted=Object.entries(aggd).sort((a,b)=>b[1].v-a[1].v);
-  const posSorted=sorted.filter(e=>e[1].v>0);
-  const negSorted=sorted.filter(e=>e[1].v<0);
-  const posTotal=posSorted.reduce((s,e)=>s+e[1].v,0);
-  const negTotal=negSorted.reduce((s,e)=>s+e[1].v,0);
+  const posTotal=sorted.filter(e=>e[1].v>0).reduce((s,e)=>s+e[1].v,0);
   const maxAPR=Math.max(1,...sorted.map(([,d])=>{const a=calcAPR(d.v,d.investUsd);return a?Math.abs(a):0;}));
-
-  // Gains pie
-  document.getElementById('pieCenterVal').textContent=fmt(posTotal);
+  const posSorted=sorted.filter(e=>e[1].v>0);
   pieChart=new Chart(document.getElementById('pieChart').getContext('2d'),{
     type:'doughnut',data:{labels:posSorted.map(e=>e[0]),datasets:[{data:posSorted.map(e=>Math.round(e[1].v)),backgroundColor:posSorted.map(e=>gc(e[0])),borderWidth:0,hoverOffset:4}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1f26',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleFont:{family:"'IBM Plex Mono'"},bodyFont:{family:"'IBM Plex Mono'"},callbacks:{label:c=>` ${fmt(c.raw)} (${posTotal>0?((c.raw/posTotal)*100).toFixed(1):0}%)`}}}}
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1f26',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleFont:{family:"'IBM Plex Mono'"},bodyFont:{family:"'IBM Plex Mono'"},callbacks:{label:c=>` ${fmt(c.raw)} (${posTotal>0?((c.raw/posTotal)*100).toFixed(1):0}%)`}}}}
   });
-
-  // Losses pie — only show if there are losses
-  const lossPieWrap=document.getElementById('lossPieWrap');
-  if(negSorted.length>0){
-    lossPieWrap.style.display='block';
-    document.getElementById('lossPieCenterVal').textContent=fmt(negTotal);
-    lossPieChart=new Chart(document.getElementById('lossPieChart').getContext('2d'),{
-      type:'doughnut',data:{labels:negSorted.map(e=>e[0]),datasets:[{data:negSorted.map(e=>Math.round(Math.abs(e[1].v))),backgroundColor:negSorted.map(e=>gc(e[0])),borderWidth:0,hoverOffset:4}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1f26',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleFont:{family:"'IBM Plex Mono'"},bodyFont:{family:"'IBM Plex Mono'"},callbacks:{label:c=>` -${fmt(c.raw)} (${negTotal!==0?((c.raw/Math.abs(negTotal))*100).toFixed(1):0}%)`}}}}
-    });
-  } else {
-    lossPieWrap.style.display='none';
-  }
   const isAll=month==='ALL';
   document.getElementById('protoTableWrap').innerHTML=`
     <table class="proto-table"><thead><tr>
@@ -539,7 +444,7 @@ function renderProtoTable(month){
       const bc=apr!==null?(apr>=0?'var(--green)':'var(--red)'):'var(--muted)';
       const tok=d.qty&&d.token?`${fmtQ(d.qty)} <span class="token-tag">${d.token}</span>`:'—';
       return `<tr>
-        <td><span class="proto-dot" style="background:${gc(p)}"></span>${PROTO_LINKS[p]?`<a href="${PROTO_LINKS[p]}" target="_blank" style="color:var(--text);text-decoration:none;border-bottom:1px dashed var(--muted)">${p}</a>`:p}</td>
+        <td><span class="proto-dot" style="background:${gc(p)}"></span>${p}</td>
         ${!isAll?`<td style="color:var(--muted)">${tok}</td>`:''}
         ${!isAll?`<td>${d.investUsd?fmt(d.investUsd):'—'}</td>`:''}
         <td class="${d.v>=0?'pos':'neg'}">${fmt(d.v)}</td>
@@ -606,14 +511,7 @@ function openEntryModal(editMonth){
   _rowId=0;
   document.getElementById('entryTitle').textContent=editMonth?`Edit — ${editMonth}`:'New month';
   const mInput=document.getElementById('eMonth');
-  // Init or pre-fill picker
-  if(!editMonth){
-    initPicker();
-    document.getElementById('monthPicker').style.display='block';
-  } else {
-    document.getElementById('monthPicker').style.display='none';
-    mInput.value=editMonth||'';
-  }
+  mInput.value=editMonth||'';
   mInput.disabled=!!editMonth;
 
   if(editMonth&&RAW[editMonth]){
@@ -769,388 +667,165 @@ function showToast(msg,type='success'){
 document.getElementById('entryOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEntry();});
 document.getElementById('manageOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeManage();});
 
+loadData();activeYear=getYears().slice(-1)[0]||'ALL';buildNav();renderAll('ALL');
 
-// ── MONTH/YEAR PICKER ──
-const MONTH_NAMES=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-let _pickerYear=2026, _pickerMonth=null;
+// ── LIVE PRICES ──
+const CG = {
+  BTC:{id:'bitcoin',name:'Bitcoin'},
+  ETH:{id:'ethereum',name:'Ethereum'},
+  SOL:{id:'solana',name:'Solana'},
+  TRX:{id:'tron',name:'TRON'},
+  JLP:{id:'jupiter-perpetuals-liquidity-provider-token',name:'JLP'},
+  PYTH:{id:'pyth-network',name:'Pyth'},
+  GMX:{id:'gmx',name:'GMX'},
+  DOT:{id:'polkadot',name:'Polkadot'},
+  NEAR:{id:'near',name:'NEAR'},
+  AERO:{id:'aerodrome-finance',name:'Aerodrome'}
+};
+const SYMS = Object.keys(CG);
+const IDS  = SYMS.map(s=>CG[s].id).join(',');
+let liveData = {};
+let sparkCharts = {};
+let selectedSpark = null;
 
-function initPicker(){
-  _pickerYear=2026; _pickerMonth=null;
-  document.getElementById('pickerYear').textContent=_pickerYear;
-  document.getElementById('eMonth').value='';
-  renderPicker();
+function fmtPrice(p){
+  return p>=100 ? '$'+p.toLocaleString(undefined,{maximumFractionDigits:2})
+       : p>=1   ? '$'+p.toFixed(3)
+       : p>=0.01? '$'+p.toFixed(4)
+       : '$'+p.toFixed(6);
 }
-function renderPicker(){
-  const grid=document.getElementById('pickerMonths');
-  grid.innerHTML=MONTH_NAMES.map((m,i)=>{
-    const key=m+' '+String(_pickerYear).slice(-2);
-    const isSel=_pickerMonth===i;
-    const exists=!!RAW[key];
-    return `<button type="button" class="picker-month${isSel?' selected':''}" onclick="selectPickerMonth(${i})" ${exists?'style="opacity:0.4;font-style:italic"':''} title="${exists?key+' (exists)':key}">${m}</button>`;
+
+async function loadPrices(){
+  const btn = document.getElementById('refreshPricesBtn');
+  if(btn){btn.textContent='...';btn.disabled=true;}
+
+  // Try CoinGecko direct
+  let data = null;
+  try{
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+IDS+'&vs_currencies=usd&include_30d_change=true',{signal:AbortSignal.timeout(7000)});
+    if(r.ok){const d=await r.json();if(Object.keys(d).length>0)data=d;}
+  }catch(e){}
+
+  // Claude API fallback
+  if(!data){
+    try{
+      const r = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,
+          tools:[{type:'web_search_20250305',name:'web_search'}],
+          messages:[{role:'user',content:'Search CoinGecko for current USD prices of bitcoin ethereum solana tron pyth-network gmx polkadot near aerodrome-finance jupiter-perpetuals-liquidity-provider-token. Reply with ONLY a valid JSON object using those exact coin IDs as keys, format: {"bitcoin":{"usd":94000,"usd_30d_change":-2.1},...}'}]
+        })
+      });
+      if(r.ok){
+        const d=await r.json();
+        const txt=(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+        const m=txt.match(/\{[\s\S]*"usd"[\s\S]*\}/);
+        if(m)data=JSON.parse(m[0]);
+      }
+    }catch(e){}
+  }
+
+  if(btn){btn.textContent='↻ Refresh';btn.disabled=false;}
+  if(!data)return;
+  liveData=data;
+
+  const ts=document.getElementById('priceTimestamp');
+  if(ts)ts.textContent='Updated '+new Date().toLocaleTimeString();
+
+  renderPriceCards();
+  loadAllSparklines();
+}
+
+function renderPriceCards(){
+  const grid=document.getElementById('priceCardsGrid');
+  if(!grid)return;
+  grid.innerHTML=SYMS.map(sym=>{
+    const d=liveData[CG[sym].id];
+    if(!d)return '';
+    const p=d.usd,chg=d.usd_30d_change||0,pos=chg>=0;
+    return '<div class="pcrd" onclick="showSparkFull(\''+sym+'\')">'+
+      '<div class="pcrd-sym">'+sym+'</div>'+
+      '<div class="pcrd-price '+(pos?'pos':'neg')+'">'+fmtPrice(p)+'</div>'+
+      '<div class="pcrd-chg '+(pos?'pos':'neg')+'">'+(pos?'+':'')+chg.toFixed(1)+'% 30d</div>'+
+      '<div class="pcrd-name">'+CG[sym].name+'</div>'+
+      '</div>';
   }).join('');
 }
-function pickerPrevYear(){ _pickerYear--; _pickerMonth=null; document.getElementById('pickerYear').textContent=_pickerYear; document.getElementById('eMonth').value=''; renderPicker(); }
-function pickerNextYear(){ _pickerYear++; _pickerMonth=null; document.getElementById('pickerYear').textContent=_pickerYear; document.getElementById('eMonth').value=''; renderPicker(); }
-function selectPickerMonth(idx){
-  _pickerMonth=idx;
-  const key=MONTH_NAMES[idx]+' '+String(_pickerYear).slice(-2);
-  document.getElementById('eMonth').value=key;
-  renderPicker();
-}
 
+async function loadAllSparklines(){
+  const grid=document.getElementById('sparklineGrid');
+  if(!grid)return;
+  // Build card shells first
+  grid.innerHTML=SYMS.map(sym=>{
+    const d=liveData[CG[sym].id];
+    if(!d)return '';
+    const chg=d.usd_30d_change||0,pos=chg>=0;
+    return '<div class="scard" id="sc_'+sym+'">'+
+      '<div class="scard-top">'+
+        '<span class="scard-sym">'+sym+'</span>'+
+        '<span class="scard-chg '+(pos?'pos':'neg')+'">'+(pos?'+':'')+chg.toFixed(1)+'% 30d</span>'+
+      '</div>'+
+      '<div style="position:relative;height:60px"><canvas id="spark_'+sym+'"></canvas></div>'+
+    '</div>';
+  }).join('');
 
-// ═══════════════════════════════════════════════════
-// LIVE PRICES — CoinGecko API
-// ═══════════════════════════════════════════════════
-
-// Map token symbols used in dashboard → CoinGecko coin IDs
-const COIN_MAP = {
-  "TRX":    {id:"tron",                  name:"TRON",          symbol:"TRX"},
-  "JLP":    {id:"jupiter-perpetuals-liquidity-provider-token", name:"JLP", symbol:"JLP"},
-  "PYTH":   {id:"pyth-network",          name:"Pyth Network",  symbol:"PYTH"},
-  "GMX":    {id:"gmx",                   name:"GMX",           symbol:"GMX"},
-  "DOT":    {id:"polkadot",              name:"Polkadot",      symbol:"DOT"},
-  "NEAR":   {id:"near",                  name:"NEAR Protocol", symbol:"NEAR"},
-  "SOL":    {id:"solana",               name:"Solana",        symbol:"SOL"},
-  "AERO":   {id:"aerodrome-finance",    name:"Aerodrome",     symbol:"AERO"},
-  "ETH":    {id:"ethereum",             name:"Ethereum",      symbol:"ETH"},
-  "BTC":    {id:"bitcoin",              name:"Bitcoin",       symbol:"BTC"},
-  "ETH":    {id:"ethereum",             name:"Ethereum",      symbol:"ETH"},
-  "SOL":    {id:"solana",               name:"Solana",        symbol:"SOL"},
-};
-
-// Tokens to always show in prices page (regardless of portfolio)
-const ALWAYS_SHOW = ["BTC","ETH","SOL"];
-
-let priceData = {};
-let priceChartInst = null;
-let selectedCoin = null;
-let selectedDays = 7;
-
-// Collect all unique tokens from RAW data
-function getMyTokens(){
-  const tokens = new Set();
-  Object.values(RAW).forEach(month => {
-    month.rows.forEach(r => { if(r.token) r.token.split('+').forEach(t => tokens.add(t.trim())); });
-  });
-  return [...tokens].filter(t => COIN_MAP[t]);
-}
-
-
-
-async function fetchPrices(){
-  const btn = document.getElementById('refreshBtn');
-  btn.textContent = '↻ Loading...';
-  btn.disabled = true;
-
-  const portfolioTokens = getMyTokens();
-  const allTokens = [...new Set([...ALWAYS_SHOW, ...portfolioTokens])];
-
-  const success = await tryFetchPrices(allTokens);
-  if(success){
-    renderPriceCards(allTokens);
-    document.getElementById('pricesLastUpdate').textContent = 'Updated ' + new Date().toLocaleTimeString();
-  } else {
-    document.getElementById('priceCards').innerHTML = `
-      <div class="kpi" style="grid-column:1/-1;text-align:center;padding:28px;font-family:var(--font-mono);font-size:13px">
-        <div style="color:var(--red);margin-bottom:12px">Could not load live prices</div>
-        <div style="color:var(--muted);font-size:11px;line-height:1.8;margin-bottom:16px">
-          Live prices require an internet connection and HTTPS.<br>
-          <strong style="color:var(--text)">Solution:</strong> Upload to GitHub Pages, then prices will work automatically.
-        </div>
-        <button class="btn" onclick="fetchPrices()" style="display:inline-flex;margin:auto">↻ Try again</button>
-      </div>`;
-  }
-
-  btn.textContent = '↻ Refresh';
-  btn.disabled = false;
-}
-
-async function tryFetchPrices(allTokens){
-  const ids = [...new Set(allTokens.map(t => COIN_MAP[t]?.id).filter(Boolean))].join(',');
-
-  // Proxy 1: CoinGecko direct (works on HTTPS / GitHub Pages)
-  try {
-    const res = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_30d_change=true`,
-      {headers:{'Accept':'application/json'}, signal: AbortSignal.timeout(6000)}
-    );
-    if(res.ok){
-      const data = await res.json();
-      if(Object.keys(data).length > 0){ priceData = data; return true; }
-    }
-  } catch(e){}
-
-  // Proxy 2: via allorigins (CORS proxy — works from local files)
-  try {
-    const apiUrl = encodeURIComponent(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_30d_change=true`
-    );
-    const res = await fetch(`https://api.allorigins.win/get?url=${apiUrl}`,
-      {signal: AbortSignal.timeout(8000)}
-    );
-    if(res.ok){
-      const wrapper = await res.json();
-      const data = JSON.parse(wrapper.contents);
-      if(Object.keys(data).length > 0){ priceData = data; return true; }
-    }
-  } catch(e){}
-
-  // Proxy 3: corsproxy.io
-  try {
-    const res = await fetch(
-      `https://corsproxy.io/?url=https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_30d_change=true`,
-      {signal: AbortSignal.timeout(8000)}
-    );
-    if(res.ok){
-      const data = await res.json();
-      if(Object.keys(data).length > 0){ priceData = data; return true; }
-    }
-  } catch(e){}
-
-  return false;
-}
-
-
-
-async function loadCoinChart(coinId, days){
-  if(priceChartInst) priceChartInst.destroy();
-  const canvas = document.getElementById('priceChart');
-  canvas.style.opacity = '0.4';
-
-  try {
-    const apiUrl2 = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`;
-    const proxies2 = [
-      apiUrl2,
-      `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl2)}`,
-      `https://corsproxy.io/?url=${apiUrl2}`,
-    ];
-    let chartData = null;
-    for(const url of proxies2){
-      try{
-        const r = await fetch(url, {signal:AbortSignal.timeout(8000)});
-        if(!r.ok) continue;
-        let raw = await r.json();
-        if(raw.contents) raw = JSON.parse(raw.contents);
-        if(raw.prices){ chartData = raw; break; }
-      } catch(e){ continue; }
-    }
-    if(!chartData) throw new Error('All proxies failed');
-    const prices = chartData.prices; // [[timestamp, price], ...]
-
-    const labels = prices.map(p => {
-      const d = new Date(p[0]);
-      return days <= 7 ? d.toLocaleDateString('en',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',hour12:false})
-                       : d.toLocaleDateString('en',{month:'short',day:'numeric'});
-    });
-    // Reduce label density
-    const step = Math.max(1, Math.floor(labels.length / 40));
-    const sparseLabels = labels.map((l,i) => i % step === 0 ? l : '');
-
-    const vals = prices.map(p => p[1]);
-    const minVal = Math.min(...vals), maxVal = Math.max(...vals);
-    const isUp = vals[vals.length-1] >= vals[0];
-    const color = isUp ? '#22c55e' : '#ef4444';
-
-    priceChartInst = new Chart(canvas.getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: sparseLabels,
-        datasets: [{
-          data: vals,
-          borderColor: color,
-          borderWidth: 2,
-          pointRadius: 0,
-          fill: true,
-          backgroundColor: isUp ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.07)',
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: {display: false},
-          tooltip: {
-            backgroundColor: '#1a1f26', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
-            titleFont: {family:"'IBM Plex Mono'", size:10},
-            bodyFont:  {family:"'IBM Plex Mono'", size:11},
-            callbacks: {
-              title: (items) => labels[items[0].dataIndex],
-              label:  (c)    => ' $' + (c.raw < 1 ? c.raw.toFixed(5) : c.raw.toFixed(3))
-            }
-          }
-        },
-        scales: {
-          x: {ticks: {color:'#6b7280', font:{family:"'IBM Plex Mono'",size:9}, maxRotation:0, autoSkip:true, maxTicksLimit:8}, grid:{display:false}, border:{color:'rgba(255,255,255,0.07)'}},
-          y: {
-            min: minVal * 0.998, max: maxVal * 1.002,
-            ticks: {color:'#6b7280', font:{family:"'IBM Plex Mono'",size:10}, callback: v => v < 1 ? '$'+v.toFixed(4) : '$'+v.toFixed(2)},
-            grid: {color:'rgba(255,255,255,0.05)'}, border:{color:'rgba(255,255,255,0.07)'}
-          }
-        }
-      }
-    });
-    canvas.style.opacity = '1';
-  } catch(e) {
-    canvas.style.opacity = '1';
-    showToast('Chart load failed — rate limited, try again', 'error');
+  // Load each sparkline with delay
+  for(const sym of SYMS){
+    await fetchSparkline(sym);
+    await new Promise(r=>setTimeout(r,450));
   }
 }
 
-
-// ── MINI PRICE CHARTS (home screen) ──
-const MINI_COINS = ["BTC","ETH","SOL","TRX","JLP","PYTH","GMX","DOT","NEAR","AERO"];
-let miniPriceData = {};
-let miniChartInsts = {};
-
-async function initMiniCharts(){
-  const section = document.getElementById('miniChartsSection');
-  const coins = MINI_COINS.filter(t => COIN_MAP[t]);
-  const ids = coins.map(t => COIN_MAP[t].id).join(',');
-
-  // Show skeleton
-  section.innerHTML = `<div class="mini-chart-grid">${coins.map(t=>`
-    <div class="mini-chart-card" id="miniCard_${t}">
-      <div class="mini-chart-top">
-        <span class="mini-chart-sym">${t}</span>
-        <span class="mini-chart-chg" style="color:var(--muted)">—</span>
-      </div>
-      <div class="mini-chart-price" style="color:var(--muted)">Loading...</div>
-      <div style="height:40px;margin-top:6px;position:relative"><canvas id="miniCanvas_${t}"></canvas></div>
-      <div class="mini-chart-name">${COIN_MAP[t].name}</div>
-    </div>`).join('')}</div>`;
-
-  // Fetch prices — try multiple proxies
-  const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_30d_change=true`;
-  const proxies = [
-    apiUrl,
-    `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`,
-    `https://corsproxy.io/?url=${apiUrl}`,
-  ];
-  for(const url of proxies){
-    try {
-      const res = await fetch(url, {signal: AbortSignal.timeout(7000)});
-      if(!res.ok) continue;
-      let raw = await res.json();
-      // allorigins wraps in {contents: "..."}
-      if(raw.contents) raw = JSON.parse(raw.contents);
-      if(Object.keys(raw).length > 0){
-        miniPriceData = raw;
-        coins.forEach(t => renderMiniCard(t));
-        break;
-      }
-    } catch(e){ continue; }
-  }
-  if(Object.keys(miniPriceData).length === 0){
-    coins.forEach(t => {
-      const card = document.getElementById('miniCard_'+t);
-      if(card) card.querySelector('.mini-chart-price').textContent = '—';
-    });
-  }
-
-  // Fetch sparklines for each coin (7d)
-  for(const t of coins){
-    fetchMiniSparkline(t);
-    await new Promise(r => setTimeout(r, 300)); // small delay to avoid rate limit
-  }
-}
-
-function renderMiniCard(t){
-  const coin = COIN_MAP[t];
-  const data = miniPriceData[coin.id];
-  if(!data) return;
-  const price = data.usd;
-  const chg = data.usd_30d_change ?? 0;
-  const isPos = chg >= 0;
-  const priceStr = price < 0.01 ? '$'+price.toFixed(5)
-                 : price < 1    ? '$'+price.toFixed(4)
-                 : price < 100  ? '$'+price.toFixed(3)
-                 : '$'+price.toLocaleString(undefined,{maximumFractionDigits:2});
-  const card = document.getElementById('miniCard_'+t);
-  if(!card) return;
-  card.querySelector('.mini-chart-price').textContent = priceStr;
-  card.querySelector('.mini-chart-price').className = 'mini-chart-price ' + (isPos?'pos':'neg');
-  card.querySelector('.mini-chart-chg').textContent = (isPos?'+':'') + chg.toFixed(1) + '% 30d';
-  card.querySelector('.mini-chart-chg').className = 'mini-chart-chg ' + (isPos?'pos':'neg');
-  // Click to open prices page
-  card.onclick = () => { showPricesPage(); setTimeout(()=>selectCoinChart(t), 300); };
-}
-
-async function fetchMiniSparkline(t){
-  const coin = COIN_MAP[t];
-  const apiUrl = `https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart?vs_currency=usd&days=30`;
-  const proxies = [
-    apiUrl,
-    `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`,
-    `https://corsproxy.io/?url=${apiUrl}`,
-  ];
-  for(const url of proxies){
-    try {
-      const res = await fetch(url, {signal: AbortSignal.timeout(8000)});
-      if(!res.ok) continue;
-      let raw = await res.json();
-      if(raw.contents) raw = JSON.parse(raw.contents);
-      if(raw.prices){
-        drawSparkline('miniCanvas_'+t, raw.prices.map(p=>p[1]));
+async function fetchSparkline(sym){
+  const coin=CG[sym];
+  try{
+    const r=await fetch('https://api.coingecko.com/api/v3/coins/'+coin.id+'/market_chart?vs_currency=usd&days=30',{signal:AbortSignal.timeout(7000)});
+    if(r.ok){
+      const d=await r.json();
+      if(d.prices&&d.prices.length>0){
+        drawSpark('spark_'+sym, d.prices.map(p=>p[1]));
         return;
       }
-    } catch(e){ continue; }
+    }
+  }catch(e){}
+  // flat fallback
+  if(liveData[coin.id]){
+    drawSpark('spark_'+sym, Array(20).fill(liveData[coin.id].usd));
   }
 }
 
-function drawSparkline(canvasId, prices){
-  const canvas = document.getElementById(canvasId);
-  if(!canvas) return;
-  if(miniChartInsts[canvasId]) miniChartInsts[canvasId].destroy();
-  const isUp = prices[prices.length-1] >= prices[0];
-  miniChartInsts[canvasId] = new Chart(canvas.getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: prices.map((_,i)=>i),
-      datasets: [{
-        data: prices,
-        borderColor: isUp ? '#22c55e' : '#ef4444',
-        borderWidth: 1.5,
-        pointRadius: 0,
-        fill: true,
-        backgroundColor: isUp ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {legend:{display:false}, tooltip:{enabled:false}},
-      scales: {
-        x: {display:false},
-        y: {display:false}
-      },
-      animation: {duration: 400}
+function drawSpark(canvasId, prices){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas)return;
+  if(sparkCharts[canvasId])sparkCharts[canvasId].destroy();
+  const isUp=prices[prices.length-1]>=prices[0];
+  sparkCharts[canvasId]=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels:prices.map((_,i)=>i),datasets:[{
+      data:prices,borderColor:isUp?'#22c55e':'#ef4444',borderWidth:1.5,
+      pointRadius:0,fill:true,
+      backgroundColor:isUp?'rgba(34,197,94,0.08)':'rgba(239,68,68,0.08)',tension:0.4
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{enabled:false}},
+      scales:{x:{display:false},y:{display:false}},
+      animation:{duration:300}
     }
   });
 }
 
-// Update showPricesPage to work without the header button
-function showPricesPage(){
-  document.getElementById('pricesPage').style.display = 'block';
-  document.getElementById('miniChartsSection').style.display = 'none';
-  document.getElementById('navBar').style.display = 'none';
-  document.getElementById('kpiGrid').style.display = 'none';
-  document.getElementById('legendWrap').style.display = 'none';
-  document.querySelectorAll('.charts-grid').forEach(el => el.style.display = 'none');
-  document.querySelectorAll('#monthSubTabs').forEach(el => el.style.display = 'none');
-  if(Object.keys(priceData).length === 0) fetchPrices();
-}
+// Show/hide home prices when year is selected
+const _origSelectYear = selectYear;
+selectYear = function(yr){
+  _origSelectYear(yr);
+  const hp=document.getElementById('homePrices');
+  if(hp)hp.style.display='none';
+};
+const _origSelectAll = typeof selectAll!=='undefined' ? selectAll : null;
 
-function hidePricesPage(){
-  document.getElementById('pricesPage').style.display = 'none';
-  document.getElementById('miniChartsSection').style.display = 'block';
-  document.getElementById('navBar').style.display = 'flex';
-  document.getElementById('kpiGrid').style.display = 'grid';
-  document.getElementById('legendWrap').style.display = 'flex';
-  document.querySelectorAll('.charts-grid').forEach(el => el.style.display = 'grid');
-}
+// Auto-load prices on page start
+window.addEventListener('load', ()=>{ setTimeout(loadPrices, 500); });
 
-loadData();activeYear=getYears().slice(-1)[0]||'ALL';buildNav();renderAll('ALL');
 </script>
 </body>
 </html>
