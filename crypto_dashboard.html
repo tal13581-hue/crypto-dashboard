@@ -210,7 +210,7 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
         <button class="btn" id="refreshPricesBtn" onclick="loadPrices()" style="padding:4px 12px;font-size:11px">↻ Refresh</button>
       </div>
     </div>
-    <div id="unifiedGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px"><div id="priceLoadingMsg" style="grid-column:1/-1;text-align:center;padding:16px;font-family:var(--font-mono);font-size:12px;color:var(--muted)">Loading prices...</div></div>
+    <div id="unifiedGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px"><div id="priceLoadMsg" style="grid-column:1/-1;text-align:center;padding:16px;font-family:var(--font-mono);font-size:12px;color:var(--muted)">Loading prices...</div></div>
   </div>
 
 </main>
@@ -745,32 +745,75 @@ async function loadPrices(){
 function renderPriceCards(){
   var grid=document.getElementById('unifiedGrid');
   if(!grid)return;
-  // Remove loading message
-  var msg=document.getElementById('priceLoadingMsg');
+  var msg=document.getElementById('priceLoadMsg');
   if(msg)msg.remove();
-  // Build/update cards
   SYMS.forEach(function(sym){
-    var existing=document.getElementById('uc_'+sym);
-    var d=liveData[CG[sym].id];
-    if(!d)return;
+    if(document.getElementById('uc_'+sym))return;
+    var d=liveData[CG[sym].id];if(!d)return;
     var p=d.usd,chg=d.usd_30d_change||0,pos=chg>=0;
-    var ps=p>=100?'$'+p.toLocaleString(undefined,{maximumFractionDigits:2}):p>=1?'$'+p.toFixed(3):p>=0.01?'$'+p.toFixed(4):'$'+p.toFixed(6);
-    if(!existing){
-      var div=document.createElement('div');
-      div.className='ucrd';div.id='uc_'+sym;
-      div.innerHTML=
-        '<div class="ucrd-top"><span class="ucrd-sym">'+sym+'</span><span class="ucrd-name">'+CG[sym].name+'</span></div>'+
-        '<div class="ucrd-price '+(pos?'pos':'neg')+'" id="uprice_'+sym+'">'+ps+'</div>'+
-        '<div class="ucrd-chg '+(pos?'pos':'neg')+'" id="uchg_'+sym+'">'+(pos?'+':'')+chg.toFixed(2)+'% 30d</div>'+
-        '<div class="ucrd-spark"><canvas id="spark_'+sym+'"></canvas></div>';
-      grid.appendChild(div);
-    } else {
-      var pp=document.getElementById('uprice_'+sym);
-      var cc=document.getElementById('uchg_'+sym);
-      if(pp){pp.textContent=ps;pp.className='ucrd-price '+(pos?'pos':'neg');}
-      if(cc){cc.textContent=(pos?'+':'')+chg.toFixed(2)+'% 30d';cc.className='ucrd-chg '+(pos?'pos':'neg');}
-    }
+    var ps=p>=100?'$'+p.toLocaleString(undefined,{maximumFractionDigits:2})
+          :p>=1?'$'+p.toFixed(3):p>=0.01?'$'+p.toFixed(4):'$'+p.toFixed(6);
+    var div=document.createElement('div');
+    div.className='ucrd';div.id='uc_'+sym;
+    div.innerHTML='<div class="ucrd-top">'+'<span class="ucrd-sym">'+sym+'</span>'+'<span class="ucrd-name">'+CG[sym].name+'</span></div>'+'<div class="ucrd-price '+(pos?'pos':'neg')+'" id="upr_'+sym+'">'+ps+'</div>'+'<div class="ucrd-chg '+(pos?'pos':'neg')+'" id="uch_'+sym+'">'+(pos?'+':'')+chg.toFixed(2)+'% 30d</div>'+'<div class="ucrd-spark"><canvas id="spark_'+sym+'"></canvas></div>';
+    grid.appendChild(div);
   });
-}function loadAllSparklines(){
+}
+
+function loadAllSparklines(){
   SYMS.forEach(function(sym,i){setTimeout(function(){fetchSparkline(sym);},i*500);});
 }
+
+async function fetchSparkline(sym){
+  const coin=CG[sym];
+  try{
+    const r=await fetch('https://api.coingecko.com/api/v3/coins/'+coin.id+'/market_chart?vs_currency=usd&days=30',{signal:AbortSignal.timeout(7000)});
+    if(r.ok){
+      const d=await r.json();
+      if(d.prices&&d.prices.length>0){
+        drawSpark('spark_'+sym, d.prices.map(p=>p[1]));
+        return;
+      }
+    }
+  }catch(e){}
+  // flat fallback
+  if(liveData[coin.id]){
+    drawSpark('spark_'+sym, Array(20).fill(liveData[coin.id].usd));
+  }
+}
+
+function drawSpark(canvasId, prices){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas)return;
+  if(sparkCharts[canvasId])sparkCharts[canvasId].destroy();
+  const isUp=prices[prices.length-1]>=prices[0];
+  sparkCharts[canvasId]=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels:prices.map((_,i)=>i),datasets:[{
+      data:prices,borderColor:isUp?'#22c55e':'#ef4444',borderWidth:1.5,
+      pointRadius:0,fill:true,
+      backgroundColor:isUp?'rgba(34,197,94,0.08)':'rgba(239,68,68,0.08)',tension:0.4
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{enabled:false}},
+      scales:{x:{display:false},y:{display:false}},
+      animation:{duration:300}
+    }
+  });
+}
+
+// Show/hide home prices when year is selected
+const _origSelectYear = selectYear;
+selectYear = function(yr){
+  _origSelectYear(yr);
+  const hp=document.getElementById('homePrices');
+  if(hp)hp.style.display='none';
+};
+const _origSelectAll = typeof selectAll!=='undefined' ? selectAll : null;
+
+// Auto-load prices on page start
+window.addEventListener('load', ()=>{ setTimeout(loadPrices, 500); });
+
+</script>
+</body>
+</html>
