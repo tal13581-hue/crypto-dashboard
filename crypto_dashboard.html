@@ -164,7 +164,9 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
 .ucrd-name{font-size:9px;color:var(--muted);font-family:var(--font-mono)}
 .ucrd-price{font-size:18px;font-weight:600;font-family:var(--font-mono);margin-bottom:2px}
 .ucrd-chg{font-size:11px;font-family:var(--font-mono);margin-bottom:6px}
-.ucrd-spark{position:relative;height:54px}
+
+.range-btn{font-family:var(--font-mono);font-size:10px;padding:3px 9px;border-radius:5px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s}
+.range-btn.active,.range-btn:hover{border-color:var(--accent);color:var(--accent)}
 </style>
 </head>
 <body>
@@ -204,13 +206,13 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
   <!-- HOME PRICES SECTION — shown by default -->
   <div id="homePrices" style="margin-bottom:28px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <span style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Live prices — 30d change</span>
+      <div style="display:flex;align-items:center;gap:0"><span style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Live prices</span><div style="display:flex;gap:5px;margin-left:12px"><button class="range-btn" onclick="setRange('24h',this)">24h</button><button class="range-btn active" onclick="setRange('7d',this)">7d</button><button class="range-btn" onclick="setRange('30d',this)">30d</button><button class="range-btn" onclick="setRange('1y',this)">1y</button></div></div>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="priceTimestamp" style="font-family:var(--font-mono);font-size:10px;color:var(--muted2)"></span>
         <button class="btn" id="refreshPricesBtn" onclick="loadPrices()" style="padding:4px 12px;font-size:11px">↻ Refresh</button>
       </div>
     </div>
-    <div id="unifiedGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px"><div id="priceLoadMsg" style="grid-column:1/-1;text-align:center;padding:16px;font-family:var(--font-mono);font-size:12px;color:var(--muted)">Loading prices...</div></div>
+    <div id="unifiedGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px"><div id="priceLoadMsg" style="grid-column:1/-1;text-align:center;padding:16px;font-family:var(--font-mono);font-size:12px;color:var(--muted)">Loading prices...</div></div>
   </div>
 
 </main>
@@ -673,145 +675,128 @@ function showToast(msg,type='success'){
 document.getElementById('entryOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEntry();});
 document.getElementById('manageOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeManage();});
 
-loadData();activeYear=getYears()[0]||'ALL';buildNav();renderAll('ALL');
+loadData();activeYear=getYears().slice(-1)[0]||'ALL';buildNav();renderAll('ALL');
 
 // ── LIVE PRICES ──
 const CG = {
-  BTC:{id:'bitcoin',name:'Bitcoin'},
-  ETH:{id:'ethereum',name:'Ethereum'},
-  SOL:{id:'solana',name:'Solana'},
-  TRX:{id:'tron',name:'TRON'},
-  JLP:{id:'jupiter-perpetuals-liquidity-provider-token',name:'JLP'},
-  PYTH:{id:'pyth-network',name:'Pyth'},
-  GMX:{id:'gmx',name:'GMX'},
-  DOT:{id:'polkadot',name:'Polkadot'},
-  NEAR:{id:'near',name:'NEAR'},
-  AERO:{id:'aerodrome-finance',name:'Aerodrome'}
+  BTC: {id:'bitcoin',                                         name:'Bitcoin'},
+  ETH: {id:'ethereum',                                        name:'Ethereum'},
+  SOL: {id:'solana',                                          name:'Solana'},
+  TRX: {id:'tron',                                            name:'TRON'},
+  JLP: {id:'jupiter-perpetuals-liquidity-provider-token',     name:'JLP'},
+  PYTH:{id:'pyth-network',                                    name:'Pyth'},
+  GMX: {id:'gmx',                                             name:'GMX'},
+  DOT: {id:'polkadot',                                        name:'Polkadot'},
+  NEAR:{id:'near',                                            name:'NEAR'},
+  AERO:{id:'aerodrome-finance',                               name:'Aerodrome'}
 };
 const SYMS = Object.keys(CG);
 const IDS  = SYMS.map(s=>CG[s].id).join(',');
-let liveData = {};
-let sparkCharts = {};
-let selectedSpark = null;
+let liveData   = {};  // id -> market data object
+let activeRange = '7d'; // current chart range
 
+// ── Price formatting ──
 function fmtPrice(p){
-  return p>=100 ? '$'+p.toLocaleString(undefined,{maximumFractionDigits:2})
-       : p>=1   ? '$'+p.toFixed(3)
-       : p>=0.01? '$'+p.toFixed(4)
+  if(p == null) return '—';
+  return p >= 100 ? '$'+p.toLocaleString(undefined,{maximumFractionDigits:2})
+       : p >= 1   ? '$'+p.toFixed(3)
+       : p >= 0.01? '$'+p.toFixed(4)
        : '$'+p.toFixed(6);
 }
 
+// ── Fetch prices + % changes in ONE call using /coins/markets ──
+// This returns: current_price, price_change_percentage_24h,
+//               price_change_percentage_7d_in_currency,
+//               price_change_percentage_30d_in_currency,
+//               price_change_percentage_1y_in_currency
 async function loadPrices(){
   const btn = document.getElementById('refreshPricesBtn');
-  if(btn){btn.textContent='...';btn.disabled=true;}
+  if(btn){btn.textContent='...'; btn.disabled=true;}
 
-  // Try CoinGecko direct
-  let data = null;
+  const url = 'https://api.coingecko.com/api/v3/coins/markets'
+    + '?vs_currency=usd'
+    + '&ids=' + IDS
+    + '&price_change_percentage=24h,7d,30d,1y'
+    + '&sparkline=false';
+
+  let rows = null;
   try{
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+IDS+'&vs_currencies=usd&include_30d_change=true',{signal:AbortSignal.timeout(7000)});
-    if(r.ok){const d=await r.json();if(Object.keys(d).length>0)data=d;}
+    const r = await fetch(url, {signal: AbortSignal.timeout(8000)});
+    if(r.ok) rows = await r.json();
   }catch(e){}
 
-  // Claude API fallback
-  if(!data){
-    try{
-      const r = await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,
-          tools:[{type:'web_search_20250305',name:'web_search'}],
-          messages:[{role:'user',content:'Search CoinGecko for current USD prices of bitcoin ethereum solana tron pyth-network gmx polkadot near aerodrome-finance jupiter-perpetuals-liquidity-provider-token. Reply with ONLY a valid JSON object using those exact coin IDs as keys, format: {"bitcoin":{"usd":94000,"usd_30d_change":-2.1},...}'}]
-        })
-      });
-      if(r.ok){
-        const d=await r.json();
-        const txt=(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-        const m=txt.match(/\{[\s\S]*"usd"[\s\S]*\}/);
-        if(m)data=JSON.parse(m[0]);
-      }
-    }catch(e){}
-  }
+  if(btn){btn.textContent='↻ Refresh'; btn.disabled=false;}
+  if(!rows || !rows.length) return;
 
-  if(btn){btn.textContent='↻ Refresh';btn.disabled=false;}
-  if(!data)return;
-  liveData=data;
+  // Index by id
+  rows.forEach(row => { liveData[row.id] = row; });
 
-  const ts=document.getElementById('priceTimestamp');
-  if(ts)ts.textContent='Updated '+new Date().toLocaleTimeString();
+  const ts = document.getElementById('priceTimestamp');
+  if(ts) ts.textContent = 'Updated ' + new Date().toLocaleTimeString();
 
   renderPriceCards();
-  setTimeout(loadAllSparklines,200);
 }
 
+// ── Render unified price cards ──
 function renderPriceCards(){
-  var grid=document.getElementById('unifiedGrid');
-  if(!grid)return;
-  var msg=document.getElementById('priceLoadMsg');
-  if(msg)msg.remove();
+  const grid = document.getElementById('unifiedGrid');
+  if(!grid) return;
+  const msg = document.getElementById('priceLoadMsg');
+  if(msg) msg.remove();
+
   SYMS.forEach(function(sym){
-    if(document.getElementById('uc_'+sym))return;
-    var d=liveData[CG[sym].id];if(!d)return;
-    var p=d.usd,chg=d.usd_30d_change||0,pos=chg>=0;
-    var ps=p>=100?'$'+p.toLocaleString(undefined,{maximumFractionDigits:2})
-          :p>=1?'$'+p.toFixed(3):p>=0.01?'$'+p.toFixed(4):'$'+p.toFixed(6);
-    var div=document.createElement('div');
-    div.className='ucrd';div.id='uc_'+sym;
-    div.innerHTML='<div class="ucrd-top">'+'<span class="ucrd-sym">'+sym+'</span>'+'<span class="ucrd-name">'+CG[sym].name+'</span></div>'+'<div class="ucrd-price '+(pos?'pos':'neg')+'" id="upr_'+sym+'">'+ps+'</div>'+'<div class="ucrd-chg '+(pos?'pos':'neg')+'" id="uch_'+sym+'">'+(pos?'+':'')+chg.toFixed(2)+'% 30d</div>'+'<div class="ucrd-spark"><canvas id="spark_'+sym+'"></canvas></div>';
-    grid.appendChild(div);
-  });
-}
+    const d = liveData[CG[sym].id];
+    if(!d) return;
 
-function loadAllSparklines(){
-  SYMS.forEach(function(sym,i){setTimeout(function(){fetchSparkline(sym);},i*500);});
-}
+    const chg = getChg(d, activeRange);
+    const pos = chg == null || chg >= 0;
+    const ps  = fmtPrice(d.current_price);
+    const pct = chg != null ? (pos?'+':'')+chg.toFixed(2)+'% '+activeRange : '—';
 
-async function fetchSparkline(sym){
-  const coin=CG[sym];
-  try{
-    const r=await fetch('https://api.coingecko.com/api/v3/coins/'+coin.id+'/market_chart?vs_currency=usd&days=30',{signal:AbortSignal.timeout(7000)});
-    if(r.ok){
-      const d=await r.json();
-      if(d.prices&&d.prices.length>0){
-        drawSpark('spark_'+sym, d.prices.map(p=>p[1]));
-        return;
-      }
-    }
-  }catch(e){}
-  // flat fallback
-  if(liveData[coin.id]){
-    drawSpark('spark_'+sym, Array(20).fill(liveData[coin.id].usd));
-  }
-}
-
-function drawSpark(canvasId, prices){
-  const canvas=document.getElementById(canvasId);
-  if(!canvas)return;
-  if(sparkCharts[canvasId])sparkCharts[canvasId].destroy();
-  const isUp=prices[prices.length-1]>=prices[0];
-  sparkCharts[canvasId]=new Chart(canvas.getContext('2d'),{
-    type:'line',
-    data:{labels:prices.map((_,i)=>i),datasets:[{
-      data:prices,borderColor:isUp?'#22c55e':'#ef4444',borderWidth:1.5,
-      pointRadius:0,fill:true,
-      backgroundColor:isUp?'rgba(34,197,94,0.08)':'rgba(239,68,68,0.08)',tension:0.4
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{enabled:false}},
-      scales:{x:{display:false},y:{display:false}},
-      animation:{duration:300}
+    const existing = document.getElementById('uc_'+sym);
+    if(!existing){
+      const div = document.createElement('div');
+      div.className = 'ucrd'; div.id = 'uc_'+sym;
+      div.innerHTML =
+        '<div class="ucrd-top">'
+          +'<span class="ucrd-sym">'+sym+'</span>'
+          +'<span class="ucrd-name">'+CG[sym].name+'</span>'
+        +'</div>'
+        +'<div class="ucrd-price '+(pos?'pos':'neg')+'" id="upr_'+sym+'">'+ps+'</div>'
+        +'<div class="ucrd-chg  '+(pos?'pos':'neg')+'" id="uch_'+sym+'">'+pct+'</div>'
+        ;
+      grid.appendChild(div);
+    } else {
+      const pp = document.getElementById('upr_'+sym);
+      const cc = document.getElementById('uch_'+sym);
+      if(pp){ pp.textContent = ps;  pp.className = 'ucrd-price '+(pos?'pos':'neg'); }
+      if(cc){ cc.textContent = pct; cc.className = 'ucrd-chg  '+(pos?'pos':'neg'); }
     }
   });
 }
 
-// Show/hide home prices when year is selected
-const _origSelectYear = selectYear;
-selectYear = function(yr){
-  _origSelectYear(yr);
-  const hp=document.getElementById('homePrices');
-  if(hp)hp.style.display='none';
-};
-const _origSelectAll = typeof selectAll!=='undefined' ? selectAll : null;
+function getChg(d, range){
+  if(range === '24h') return d.price_change_percentage_24h;
+  if(range === '7d')  return d.price_change_percentage_7d_in_currency;
+  if(range === '30d') return d.price_change_percentage_30d_in_currency;
+  if(range === '1y')  return d.price_change_percentage_1y_in_currency;
+  return d.price_change_percentage_30d_in_currency;
+}
 
-// Auto-load prices on page start
+// ── Range selector ──
+function setRange(range, btn){
+  activeRange = range;
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderPriceCards();   // update % labels immediately
+  // Reload sparklines for new range
+
+}
+
+
+// Hide home prices when a year is clicked
+// homePrices stays visible always — no override needed
+
 window.addEventListener('load', ()=>{ setTimeout(loadPrices, 500); });
 
 </script>
