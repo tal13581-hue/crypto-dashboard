@@ -372,6 +372,8 @@ const DEFAULT = {
   "DEC 25":{total:47,source:"gs",conflict:false,rows:[{p:"TRX Bot",v:89,qty:25310,token:"TRX",investUsd:7216},{p:"Kamino",v:-174,qty:1538,token:"JLP",investUsd:7059},{p:"DOT Staking",v:14,qty:775,token:"DOT",investUsd:1550},{p:"AERO Staking",v:80,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:39,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:0,qty:26000,token:"PYTH",investUsd:1602}]},"MAR 26":{total:81,source:"dashboard",rows:[{p:"TRX Bot",v:37,qty:26599.78,token:"TRX",investUsd:8762},{p:"Kamino x 2.5",v:241,qty:1262,token:"JLP",investUsd:4914,leverageRisk:true},{p:"Kamino x 2.5 #2",v:-231,qty:940.1164,token:"JLP",investUsd:3661,leverageRisk:true},{p:"PYTH",v:22,qty:26639,token:"PYTH",investUsd:1219},{p:"GMX Staking",v:12,qty:345.21,token:"GMX",investUsd:2312}]}
 };
 
+// Coin colors (used by gc for token-named protocols)
+const COIN_COLORS={"BTC":"#f97316","ETH":"#9ca3af","SOL":"#7c3aed","TRX":"#ef4444","JLP":"#22c55e","PYTH":"#c084fc","GMX":"#3b82f6","NEAR":"#86efac","AERO":"#f1f5f9"};
 const COLORS={"Kamino":"#3b82f6","TRX Bot":"#22c55e","Binance":"#f59e0b","Ref Finance":"#ef4444","SyncSwap":"#8b5cf6","Sanctum":"#d97706","BlockCentral":"#ec4899","Aerodrome":"#84cc16","Cetus":"#06b6d4","Meridian":"#f87171","DOT Staking":"#4ade80","NEAR Staking":"#fde68a","Fuel":"#c084fc","Mode":"#60a5fa","USDC Autopilot":"#2dd4bf","MGX Staking":"#fb923c","Kamino Airdrop":"#93c5fd","AERO Staking":"#64748b","GMX Staking":"#67e8f9","PYTH":"#a3e635","SideShift":"#94a3b8","Kamino x 2.5":"#60a5fa","Kamino x 2.5 #2":"#f87171"};
 const COLOR_POOL=["#3b82f6","#22c55e","#f59e0b","#ef4444","#8b5cf6","#d97706","#ec4899","#84cc16","#06b6d4","#f87171","#4ade80","#fde68a","#c084fc","#60a5fa","#2dd4bf","#fb923c","#93c5fd","#64748b","#67e8f9","#a3e635","#94a3b8"];
 let _ci=0;
@@ -734,15 +736,15 @@ loadData();activeYear=getYears().slice(-1)[0]||'ALL';buildNav();renderAll('ALL')
 
 // ── LIVE PRICES ──
 const CG = {
-  BTC: {id:'bitcoin',                                         name:'Bitcoin'},
-  ETH: {id:'ethereum',                                        name:'Ethereum'},
-  SOL: {id:'solana',                                          name:'Solana'},
-  TRX: {id:'tron',                                            name:'TRON'},
-  JLP: {id:'jupiter-perpetuals-liquidity-provider-token',     name:'JLP'},
-  PYTH:{id:'pyth-network',                                    name:'Pyth'},
-  GMX: {id:'gmx',                                             name:'GMX'},
-  NEAR:{id:'near',                                            name:'NEAR'},
-  AERO:{id:'aerodrome-finance',                               name:'Aerodrome'}
+  BTC: {id:'bitcoin',                                         name:'Bitcoin',   color:'#f97316'},
+  ETH: {id:'ethereum',                                        name:'Ethereum',  color:'#9ca3af'},
+  SOL: {id:'solana',                                          name:'Solana',    color:'#7c3aed'},
+  TRX: {id:'tron',                                            name:'TRON',      color:'#ef4444'},
+  JLP: {id:'jupiter-perpetuals-liquidity-provider-token',     name:'JLP',       color:'#22c55e'},
+  PYTH:{id:'pyth-network',                                    name:'Pyth',      color:'#c084fc'},
+  GMX: {id:'gmx',                                             name:'GMX',       color:'#3b82f6'},
+  NEAR:{id:'near',                                            name:'NEAR',      color:'#86efac'},
+  AERO:{id:'aerodrome-finance',                               name:'Aerodrome', color:'#f1f5f9'}
 };
 const SYMS = Object.keys(CG);
 const IDS  = SYMS.map(s=>CG[s].id).join(',');
@@ -813,7 +815,9 @@ function renderPriceCards(){
       div.className = 'ucrd'; div.id = 'uc_'+sym;
       div.innerHTML =
         '<div class="ucrd-top">'
-          +'<span class="ucrd-sym">'+sym+'</span>'
+          +'<div style="display:flex;align-items:center;gap:5px">'
+          +'<span style="width:8px;height:8px;border-radius:50%;background:'+CG[sym].color+';flex-shrink:0"></span>'
+          +'<span class="ucrd-sym">'+sym+'</span></div>'
           +'<span class="ucrd-name">'+CG[sym].name+'</span>'
         +'</div>'
         +'<div class="ucrd-price '+(pos?'pos':'neg')+'" id="upr_'+sym+'">'+ps+'</div>'
@@ -853,6 +857,7 @@ function setRange(range, btn){
 
 // ── WALLET CALCULATOR ──
 let walletQty = {}; // sym -> qty entered by user
+try{ const saved=localStorage.getItem('wallet_qty'); if(saved) walletQty=JSON.parse(saved); }catch(e){}
 
 function buildWalletGrid(){
   const grid = document.getElementById('walletGrid');
@@ -895,6 +900,7 @@ function buildWalletGrid(){
 function updateWallet(sym, val){
   walletQty[sym] = parseFloat(val) || 0;
   recalcWallet();
+  try{ localStorage.setItem('wallet_qty', JSON.stringify(walletQty)); }catch(e){}
 }
 
 function recalcWallet(){
@@ -926,6 +932,7 @@ function recalcWallet(){
 
 function clearWallet(){
   walletQty = {};
+  try{ localStorage.removeItem('wallet_qty'); }catch(e){}
   SYMS.forEach(sym => {
     const inp = document.getElementById('wqty_' + sym);
     if(inp) inp.value = '';
@@ -955,7 +962,7 @@ function updateWalletPie(){
   const canvas = document.getElementById('walletPieChart');
   if(!canvas) return;
 
-  const labels = [], values = [], colors = [];
+  const labels = [], values = [], colors = [], symList = [];
   SYMS.forEach(function(sym){
     const qty = walletQty[sym] || 0;
     const d = liveData[CG[sym].id];
@@ -964,7 +971,8 @@ function updateWalletPie(){
     if(usd > 0){
       labels.push(sym);
       values.push(usd);
-      colors.push(gc ? gc(sym) : null);
+      colors.push(CG[sym].color);
+      symList.push(sym);
     }
   });
 
@@ -981,7 +989,7 @@ function updateWalletPie(){
   // Legend
   const leg = document.getElementById('walletLegend');
   if(leg){
-    leg.innerHTML = labels.map(function(sym, i){
+    leg.innerHTML = symList.map(function(sym, i){
       const pct = total > 0 ? (values[i]/total*100).toFixed(1) : 0;
       const val = '$' + values[i].toLocaleString(undefined,{maximumFractionDigits:0});
       return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
