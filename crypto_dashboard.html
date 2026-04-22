@@ -238,7 +238,20 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
   </div>
 
     <!-- ── WALLET CALCULATOR ── -->
-    <div class="wallet-section-header" onclick="toggleWallet()">
+    <div style="margin-top:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <span style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Portfolio distribution</span>
+        <span style="font-family:var(--font-mono);font-size:18px;font-weight:600;color:var(--green)" id="walletTotal">$0</span>
+      </div>
+      <div style="display:grid;grid-template-columns:240px 1fr;gap:32px;align-items:stretch;min-height:240px">
+        <div style="display:flex;align-items:center;justify-content:center">
+          <div style="position:relative;height:240px;width:240px"><canvas id="walletPieChart"></canvas></div>
+        </div>
+        <div id="walletLegend" style="display:flex;flex-direction:column;justify-content:center"></div>
+      </div>
+    </div>
+
+    <div class="wallet-section-header" onclick="toggleWallet()" style="margin-top:16px">
       <span style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">◈ Wallet calculator</span>
       <button class="wallet-toggle-btn" id="walletToggleBtn">▶ Open</button>
     </div>
@@ -247,18 +260,6 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
         <button class="btn" onclick="clearWallet();event.stopPropagation()" style="padding:4px 12px;font-size:11px">✕ Clear</button>
       </div>
       <div id="walletGrid" class="wallet-grid"></div>
-      <div class="wallet-total-bar" style="margin-top:12px">
-        <span class="wallet-total-label">Total wallet value</span>
-        <span class="wallet-total-val" id="walletTotal">$0</span>
-      </div>
-      <!-- PIE CHART -->
-      <div style="margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px">
-        <div style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px">Portfolio distribution</div>
-        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
-          <div style="position:relative;height:180px;width:180px;flex-shrink:0"><canvas id="walletPieChart"></canvas></div>
-          <div id="walletLegend" style="flex:1;min-width:120px"></div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -920,7 +921,7 @@ function recalcWallet(){
     totEl.textContent = '$' + total.toLocaleString(undefined, {maximumFractionDigits: 2});
     totEl.style.color = total > 0 ? 'var(--green)' : 'var(--text)';
   }
-  if(walletOpen) updateWalletPie();
+  updateWalletPie();
 }
 
 function clearWallet(){
@@ -982,13 +983,14 @@ function updateWalletPie(){
   if(leg){
     leg.innerHTML = labels.map(function(sym, i){
       const pct = total > 0 ? (values[i]/total*100).toFixed(1) : 0;
-      const val = '$' + values[i].toLocaleString(undefined,{maximumFractionDigits:2});
-      return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'
+      const val = '$' + values[i].toLocaleString(undefined,{maximumFractionDigits:0});
+      return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
         + '<span style="width:10px;height:10px;border-radius:50%;background:' + (colors[i]||'#888') + ';flex-shrink:0"></span>'
-        + '<span style="font-family:var(--font-mono);font-size:11px;color:var(--text)">'
-        + sym + '</span>'
-        + '<span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-left:auto">'
-        + pct + '% &nbsp;' + val + '</span>'
+        + '<span style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text);min-width:44px">' + sym + '</span>'
+        + '<div style="flex:1;background:rgba(255,255,255,0.04);border-radius:3px;height:4px;overflow:hidden">'
+        + '<div style="height:100%;background:' + (colors[i]||'#888') + ';width:' + pct + '%"></div></div>'
+        + '<span style="font-family:var(--font-mono);font-size:11px;color:var(--muted);min-width:38px;text-align:right">' + pct + '%</span>'
+        + '<span style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--green);min-width:70px;text-align:right">' + val + '</span>'
         + '</div>';
     }).join('');
   }
@@ -1005,8 +1007,9 @@ function updateWalletPie(){
       }]
     },
     options: {
-      responsive: false,
-      cutout: '60%',
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
       plugins: {
         legend: {display: false},
         tooltip: {
