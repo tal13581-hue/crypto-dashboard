@@ -184,6 +184,11 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
 .wallet-total-bar{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-top:12px;display:flex;align-items:center;justify-content:space-between}
 .wallet-total-label{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .wallet-total-val{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--text)}
+
+.wallet-collapsed{display:none}
+.wallet-section-header{display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:0;cursor:pointer;padding:10px 0}
+.wallet-toggle-btn{font-family:var(--font-mono);font-size:11px;padding:4px 12px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s}
+.wallet-toggle-btn:hover{border-color:var(--accent);color:var(--accent)}
 </style>
 </head>
 <body>
@@ -233,15 +238,26 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
   </div>
 
     <!-- ── WALLET CALCULATOR ── -->
-    <div style="margin-top:24px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <span style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Wallet calculator</span>
-        <button class="btn" onclick="clearWallet()" style="padding:4px 12px;font-size:11px">✕ Clear</button>
+    <div class="wallet-section-header" onclick="toggleWallet()">
+      <span style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">◈ Wallet calculator</span>
+      <button class="wallet-toggle-btn" id="walletToggleBtn">▶ Open</button>
+    </div>
+    <div id="walletBody" class="wallet-collapsed">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px;margin-top:8px">
+        <button class="btn" onclick="clearWallet();event.stopPropagation()" style="padding:4px 12px;font-size:11px">✕ Clear</button>
       </div>
       <div id="walletGrid" class="wallet-grid"></div>
-      <div class="wallet-total-bar">
+      <div class="wallet-total-bar" style="margin-top:12px">
         <span class="wallet-total-label">Total wallet value</span>
         <span class="wallet-total-val" id="walletTotal">$0</span>
+      </div>
+      <!-- PIE CHART -->
+      <div style="margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px">
+        <div style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px">Portfolio distribution</div>
+        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+          <div style="position:relative;height:180px;width:180px;flex-shrink:0"><canvas id="walletPieChart"></canvas></div>
+          <div id="walletLegend" style="flex:1;min-width:120px"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -839,30 +855,34 @@ let walletQty = {}; // sym -> qty entered by user
 
 function buildWalletGrid(){
   const grid = document.getElementById('walletGrid');
-  if(!grid) return;
-  grid.innerHTML = '';
+  if(!grid || grid.children.length > 0) { recalcWallet(); return; }
   SYMS.forEach(function(sym){
     const card = document.createElement('div');
     card.className = 'wallet-card';
+
+    const top = document.createElement('div');
+    top.className = 'wallet-card-top';
+    top.innerHTML = '<span class="wallet-sym">'+sym+'</span><span class="wallet-name">'+CG[sym].name+'</span>';
+
     const inp = document.createElement('input');
     inp.className = 'wallet-qty';
     inp.type = 'number';
     inp.min = '0';
     inp.step = 'any';
-    inp.placeholder = 'Qty...';
+    inp.placeholder = 'הזן כמות...';
     inp.id = 'wqty_' + sym;
     inp.value = walletQty[sym] || '';
     inp.addEventListener('input', function(){ updateWallet(sym, this.value); });
-    const top = document.createElement('div');
-    top.className = 'wallet-card-top';
-    top.innerHTML = '<span class="wallet-sym">'+sym+'</span><span class="wallet-name">'+CG[sym].name+'</span>';
+
     const wrap = document.createElement('div');
     wrap.className = 'wallet-input-wrap';
     wrap.appendChild(inp);
+
     const usd = document.createElement('div');
     usd.className = 'wallet-usd';
     usd.id = 'wusd_' + sym;
     usd.textContent = '—';
+
     card.appendChild(top);
     card.appendChild(wrap);
     card.appendChild(usd);
@@ -900,6 +920,7 @@ function recalcWallet(){
     totEl.textContent = '$' + total.toLocaleString(undefined, {maximumFractionDigits: 2});
     totEl.style.color = total > 0 ? 'var(--green)' : 'var(--text)';
   }
+  if(walletOpen) updateWalletPie();
 }
 
 function clearWallet(){
@@ -915,7 +936,97 @@ function clearWallet(){
 }
 
 
-window.addEventListener('load', ()=>{ setTimeout(loadPrices, 500); });
+// ── WALLET TOGGLE ──
+let walletOpen = false;
+let walletPieInst = null;
+
+function toggleWallet(){
+  walletOpen = !walletOpen;
+  const body = document.getElementById('walletBody');
+  const btn  = document.getElementById('walletToggleBtn');
+  if(body) body.className = walletOpen ? '' : 'wallet-collapsed';
+  if(btn)  btn.textContent = walletOpen ? '▼ Close' : '▶ Open';
+  if(walletOpen) buildWalletGrid();
+}
+
+// ── WALLET PIE CHART ──
+function updateWalletPie(){
+  const canvas = document.getElementById('walletPieChart');
+  if(!canvas) return;
+
+  const labels = [], values = [], colors = [];
+  SYMS.forEach(function(sym){
+    const qty = walletQty[sym] || 0;
+    const d = liveData[CG[sym].id];
+    const price = d ? d.current_price : 0;
+    const usd = qty * price;
+    if(usd > 0){
+      labels.push(sym);
+      values.push(usd);
+      colors.push(gc ? gc(sym) : null);
+    }
+  });
+
+  if(walletPieInst) walletPieInst.destroy();
+
+  if(values.length === 0){
+    canvas.style.opacity = '0.3';
+    return;
+  }
+  canvas.style.opacity = '1';
+
+  const total = values.reduce(function(a,b){return a+b;}, 0);
+
+  // Legend
+  const leg = document.getElementById('walletLegend');
+  if(leg){
+    leg.innerHTML = labels.map(function(sym, i){
+      const pct = total > 0 ? (values[i]/total*100).toFixed(1) : 0;
+      const val = '$' + values[i].toLocaleString(undefined,{maximumFractionDigits:2});
+      return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'
+        + '<span style="width:10px;height:10px;border-radius:50%;background:' + (colors[i]||'#888') + ';flex-shrink:0"></span>'
+        + '<span style="font-family:var(--font-mono);font-size:11px;color:var(--text)">'
+        + sym + '</span>'
+        + '<span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-left:auto">'
+        + pct + '% &nbsp;' + val + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  walletPieInst = new Chart(canvas.getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: false,
+      cutout: '60%',
+      plugins: {
+        legend: {display: false},
+        tooltip: {
+          backgroundColor: '#1a1f26',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: {
+            label: function(ctx){
+              const pct = total > 0 ? (ctx.raw/total*100).toFixed(1) : 0;
+              return ' $' + ctx.raw.toLocaleString(undefined,{maximumFractionDigits:2}) + ' (' + pct + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+
+window.addEventListener('load', ()=>{ buildWalletGrid(); setTimeout(loadPrices, 500); });
 
 </script>
 </body>
