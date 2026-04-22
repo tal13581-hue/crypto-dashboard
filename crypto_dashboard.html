@@ -167,6 +167,23 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
 
 .range-btn{font-family:var(--font-mono);font-size:10px;padding:3px 9px;border-radius:5px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s}
 .range-btn.active,.range-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.er-leverage{display:flex;align-items:center;gap:6px;margin-top:8px;font-family:var(--font-mono);font-size:11px;color:var(--muted);cursor:pointer}
+.er-leverage input{width:14px;height:14px;cursor:pointer;accent-color:#f59e0b}
+.er-leverage .warn-label{color:#f59e0b}
+
+.wallet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:16px}
+.wallet-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.wallet-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.wallet-sym{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--text)}
+.wallet-name{font-family:var(--font-mono);font-size:9px;color:var(--muted)}
+.wallet-input-wrap{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.wallet-qty{flex:1;background:var(--bg3,#0d1117);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font-mono);font-size:12px;padding:5px 8px;width:100%}
+.wallet-qty:focus{outline:none;border-color:var(--accent)}
+.wallet-usd{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--muted)}
+.wallet-total-bar{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-top:12px;display:flex;align-items:center;justify-content:space-between}
+.wallet-total-label{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.wallet-total-val{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--text)}
 </style>
 </head>
 <body>
@@ -213,6 +230,20 @@ footer{border-top:1px solid var(--border);padding:16px 32px;display:flex;align-i
       </div>
     </div>
     <div id="unifiedGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px"><div id="priceLoadMsg" style="grid-column:1/-1;text-align:center;padding:16px;font-family:var(--font-mono);font-size:12px;color:var(--muted)">Loading prices...</div></div>
+  </div>
+
+    <!-- ── WALLET CALCULATOR ── -->
+    <div style="margin-top:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <span style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Wallet calculator</span>
+        <button class="btn" onclick="clearWallet()" style="padding:4px 12px;font-size:11px">✕ Clear</button>
+      </div>
+      <div id="walletGrid" class="wallet-grid"></div>
+      <div class="wallet-total-bar">
+        <span class="wallet-total-label">Total wallet value</span>
+        <span class="wallet-total-val" id="walletTotal">$0</span>
+      </div>
+    </div>
   </div>
 
 </main>
@@ -321,7 +352,7 @@ const DEFAULT = {
   "SEP 25":{total:806,source:"xl",rows:[{p:"TRX Bot",v:148,qty:73439,token:"TRX",investUsd:25035},{p:"Kamino",v:504,qty:1732,token:"JLP",investUsd:9387},{p:"Aerodrome",v:39,qty:0.18622,token:"AERO",investUsd:525},{p:"Cetus",v:13,qty:8266,token:"CETUS+SUI",investUsd:1613},{p:"DOT Staking",v:23,qty:748.86,token:"DOT",investUsd:2898},{p:"NEAR Staking",v:16,qty:1711.7,token:"NEAR",investUsd:4190},{p:"MGX Staking",v:21,qty:319.27,token:"GMX",investUsd:0},{p:"USDC Autopilot",v:42,qty:6009,token:"USDC",investUsd:6009}]},
   "OCT 25":{total:593,source:"xl",rows:[{p:"TRX Bot",v:44,qty:23423,token:"TRX",investUsd:6825},{p:"Kamino",v:365,qty:1796.25,token:"JLP",investUsd:10239},{p:"Cetus",v:-10,qty:14741,token:"CETUS+SUI",investUsd:1520},{p:"DOT Staking",v:39,qty:769.77,token:"DOT",investUsd:2186},{p:"NEAR Staking",v:13,qty:1719.32,token:"NEAR",investUsd:4814},{p:"AERO Staking",v:41,qty:2598,token:"USDC",investUsd:2598},{p:"MGX Staking",v:59,qty:319.27,token:"GMX",investUsd:4974},{p:"SideShift",v:2,qty:2347,token:"XAI",investUsd:369},{p:"USDC Autopilot",v:40,qty:6040,token:"USDC",investUsd:6040}]},
   "NOV 25":{total:-941,source:"gs",xlTotal:371,conflict:true,rows:[{p:"TRX Bot",v:47,qty:23740,token:"TRX",investUsd:6647},{p:"Kamino",v:-1194,qty:1538,token:"JLP",investUsd:7259},{p:"Cetus",v:9,qty:650,token:"CETUS+SUI",investUsd:1003},{p:"DOT Staking",v:13,qty:775,token:"DOT",investUsd:1783},{p:"AERO Staking",v:131,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:48,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:4,qty:9400,token:"PYTH",investUsd:705}]},
-  "DEC 25":{total:47,source:"gs",conflict:false,rows:[{p:"TRX Bot",v:89,qty:25310,token:"TRX",investUsd:7216},{p:"Kamino",v:-174,qty:1538,token:"JLP",investUsd:7059},{p:"DOT Staking",v:14,qty:775,token:"DOT",investUsd:1550},{p:"AERO Staking",v:80,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:39,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:0,qty:26000,token:"PYTH",investUsd:1602}]},"MAR 26":{total:81,source:"dashboard",rows:[{p:"TRX Bot",v:37,qty:26599.78,token:"TRX",investUsd:8762},{p:"Kamino x 2.5",v:241,qty:1262,token:"JLP",investUsd:4914},{p:"Kamino x 2.5 #2",v:-231,qty:940.1164,token:"JLP",investUsd:3661},{p:"PYTH",v:22,qty:26639,token:"PYTH",investUsd:1219},{p:"GMX Staking",v:12,qty:345.21,token:"GMX",investUsd:2312}]}
+  "DEC 25":{total:47,source:"gs",conflict:false,rows:[{p:"TRX Bot",v:89,qty:25310,token:"TRX",investUsd:7216},{p:"Kamino",v:-174,qty:1538,token:"JLP",investUsd:7059},{p:"DOT Staking",v:14,qty:775,token:"DOT",investUsd:1550},{p:"AERO Staking",v:80,qty:5459,token:"USDC",investUsd:5459},{p:"GMX Staking",v:39,qty:323.34,token:"GMX",investUsd:2881},{p:"PYTH",v:0,qty:26000,token:"PYTH",investUsd:1602}]},"MAR 26":{total:81,source:"dashboard",rows:[{p:"TRX Bot",v:37,qty:26599.78,token:"TRX",investUsd:8762},{p:"Kamino x 2.5",v:241,qty:1262,token:"JLP",investUsd:4914,leverageRisk:true},{p:"Kamino x 2.5 #2",v:-231,qty:940.1164,token:"JLP",investUsd:3661,leverageRisk:true},{p:"PYTH",v:22,qty:26639,token:"PYTH",investUsd:1219},{p:"GMX Staking",v:12,qty:345.21,token:"GMX",investUsd:2312}]}
 };
 
 const COLORS={"Kamino":"#3b82f6","TRX Bot":"#22c55e","Binance":"#f59e0b","Ref Finance":"#ef4444","SyncSwap":"#8b5cf6","Sanctum":"#d97706","BlockCentral":"#ec4899","Aerodrome":"#84cc16","Cetus":"#06b6d4","Meridian":"#f87171","DOT Staking":"#4ade80","NEAR Staking":"#fde68a","Fuel":"#c084fc","Mode":"#60a5fa","USDC Autopilot":"#2dd4bf","MGX Staking":"#fb923c","Kamino Airdrop":"#93c5fd","AERO Staking":"#64748b","GMX Staking":"#67e8f9","PYTH":"#a3e635","SideShift":"#94a3b8","Kamino x 2.5":"#60a5fa","Kamino x 2.5 #2":"#f87171"};
@@ -358,10 +389,11 @@ const getMonthsForYear=yr=>yr==='ALL'?getMonths():getMonths().filter(m=>getYear(
 function aggRows(rows){
   const m={};
   rows.forEach(r=>{
-    if(!m[r.p])m[r.p]={v:0,qty:r.qty,token:r.token,investUsd:0};
+    if(!m[r.p])m[r.p]={v:0,qty:r.qty,token:r.token,investUsd:0,leverageRisk:false};
     m[r.p].v+=r.v;
     m[r.p].investUsd+=(r.investUsd||0);
     if(r.qty&&!m[r.p].qty){m[r.p].qty=r.qty;m[r.p].token=r.token;}
+    if(r.leverageRisk)m[r.p].leverageRisk=true;
   });
   return m;
 }
@@ -430,7 +462,7 @@ function renderProtoTable(month){
   if(pieChart)pieChart.destroy();
   const months=getMonthsForYear(activeYear);
   let aggd={};
-  if(month==='ALL'){months.forEach(m=>{const a=aggRows(RAW[m].rows);Object.entries(a).forEach(([p,d])=>{if(!aggd[p])aggd[p]={v:0,investUsd:0,token:d.token,qty:d.qty};aggd[p].v+=d.v;aggd[p].investUsd+=d.investUsd||0;});});}
+  if(month==='ALL'){months.forEach(m=>{const a=aggRows(RAW[m].rows);Object.entries(a).forEach(([p,d])=>{if(!aggd[p])aggd[p]={v:0,investUsd:0,token:d.token,qty:d.qty,leverageRisk:false};aggd[p].v+=d.v;aggd[p].investUsd+=d.investUsd||0;if(d.leverageRisk)aggd[p].leverageRisk=true;});});}
   else aggd=aggRows(RAW[month].rows);
   const sorted=Object.entries(aggd).sort((a,b)=>b[1].v-a[1].v);
   const posTotal=sorted.filter(e=>e[1].v>0).reduce((s,e)=>s+e[1].v,0);
@@ -452,7 +484,7 @@ function renderProtoTable(month){
       const bc=apr!==null?(apr>=0?'var(--green)':'var(--red)'):'var(--muted)';
       const tok=d.qty&&d.token?`${fmtQ(d.qty)} <span class="token-tag">${d.token}</span>`:'—';
       return `<tr>
-        <td><span class="proto-dot" style="background:${gc(p)}"></span>${p}</td>
+        <td><span class="proto-dot" style="background:${gc(p)}"></span>${p}${d.token?` <span class="token-tag">${d.token}</span>`:''}${d.leverageRisk?' <span title="סיכון מינוף נלווה" style="color:#f59e0b;font-size:13px;cursor:help">⚠</span>':''}</td>
         ${!isAll?`<td style="color:var(--muted)">${tok}</td>`:''}
         ${!isAll?`<td>${d.investUsd?fmt(d.investUsd):'—'}</td>`:''}
         <td class="${d.v>=0?'pos':'neg'}">${fmt(d.v)}</td>
@@ -540,6 +572,7 @@ function openEntryModal(editMonth){
       const price=qty>0?data.investUsd/qty:0;
       const lastMonth=data.investUsd-data.v; // reverse-calc: current value - return = last month value
       addEntryRow(p,qty,data.token||'',price||'',lastMonth>0?Math.round(lastMonth):'');
+      if(data.leverageRisk){const lb=document.getElementById('eRows').lastElementChild;if(lb){const cb=lb.querySelector('.er-lev');if(cb)cb.checked=true;}}
     });
   } else {
   
@@ -580,7 +613,11 @@ function addEntryRow(name='',qty='',token='',price='',lastMonth=''){
       </div>
       <button class="remove-btn" onclick="document.getElementById('er_${id}').remove();updateEntryTotals()">×</button>
     </div>
-    <div class="calc-row" id="calcs_${id}"></div>`;
+    <div class="calc-row" id="calcs_${id}"></div>
+    <label class="er-leverage">
+      <input type="checkbox" class="er-lev" onchange="updateEntryTotals()"/>
+      <span>⚠ <span class="warn-label">סיכון מינוף נלווה</span></span>
+    </label>`;
   document.getElementById('eRows').appendChild(div);
 }
 
@@ -627,7 +664,8 @@ function saveEntry(){
     if(!p)return;
     const investUsd=Math.round(qty*price*100)/100;
     const v=Math.round((investUsd-last)*100)/100;
-    rows.push({p,v,qty:qty||null,token:token||null,investUsd});
+    const lev=div.querySelector('.er-lev')?.checked||false;
+    rows.push({p,v,qty:qty||null,token:token||null,investUsd,leverageRisk:lev||undefined});
     total+=v;
   });
   if(rows.length===0){showToast('Add at least one protocol','error');return;}
@@ -686,7 +724,6 @@ const CG = {
   JLP: {id:'jupiter-perpetuals-liquidity-provider-token',     name:'JLP'},
   PYTH:{id:'pyth-network',                                    name:'Pyth'},
   GMX: {id:'gmx',                                             name:'GMX'},
-  DOT: {id:'polkadot',                                        name:'Polkadot'},
   NEAR:{id:'near',                                            name:'NEAR'},
   AERO:{id:'aerodrome-finance',                               name:'Aerodrome'}
 };
@@ -796,6 +833,87 @@ function setRange(range, btn){
 
 // Hide home prices when a year is clicked
 // homePrices stays visible always — no override needed
+
+// ── WALLET CALCULATOR ──
+let walletQty = {}; // sym -> qty entered by user
+
+function buildWalletGrid(){
+  const grid = document.getElementById('walletGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  SYMS.forEach(function(sym){
+    const card = document.createElement('div');
+    card.className = 'wallet-card';
+    const inp = document.createElement('input');
+    inp.className = 'wallet-qty';
+    inp.type = 'number';
+    inp.min = '0';
+    inp.step = 'any';
+    inp.placeholder = 'Qty...';
+    inp.id = 'wqty_' + sym;
+    inp.value = walletQty[sym] || '';
+    inp.addEventListener('input', function(){ updateWallet(sym, this.value); });
+    const top = document.createElement('div');
+    top.className = 'wallet-card-top';
+    top.innerHTML = '<span class="wallet-sym">'+sym+'</span><span class="wallet-name">'+CG[sym].name+'</span>';
+    const wrap = document.createElement('div');
+    wrap.className = 'wallet-input-wrap';
+    wrap.appendChild(inp);
+    const usd = document.createElement('div');
+    usd.className = 'wallet-usd';
+    usd.id = 'wusd_' + sym;
+    usd.textContent = '—';
+    card.appendChild(top);
+    card.appendChild(wrap);
+    card.appendChild(usd);
+    grid.appendChild(card);
+  });
+  recalcWallet();
+}
+
+function updateWallet(sym, val){
+  walletQty[sym] = parseFloat(val) || 0;
+  recalcWallet();
+}
+
+function recalcWallet(){
+  let total = 0;
+  SYMS.forEach(sym => {
+    const qty = walletQty[sym] || 0;
+    const d = liveData[CG[sym].id];
+    const price = d ? d.current_price : 0;
+    const usd = qty * price;
+    total += usd;
+    const el = document.getElementById('wusd_' + sym);
+    if(el){
+      if(qty > 0 && price > 0){
+        el.textContent = '$' + usd.toLocaleString(undefined, {maximumFractionDigits: 2});
+        el.className = 'wallet-usd pos';
+      } else {
+        el.textContent = '—';
+        el.className = 'wallet-usd';
+      }
+    }
+  });
+  const totEl = document.getElementById('walletTotal');
+  if(totEl){
+    totEl.textContent = '$' + total.toLocaleString(undefined, {maximumFractionDigits: 2});
+    totEl.style.color = total > 0 ? 'var(--green)' : 'var(--text)';
+  }
+}
+
+function clearWallet(){
+  walletQty = {};
+  SYMS.forEach(sym => {
+    const inp = document.getElementById('wqty_' + sym);
+    if(inp) inp.value = '';
+    const usd = document.getElementById('wusd_' + sym);
+    if(usd){ usd.textContent = '—'; usd.className = 'wallet-usd'; }
+  });
+  const totEl = document.getElementById('walletTotal');
+  if(totEl){ totEl.textContent = '$0'; totEl.style.color = 'var(--text)'; }
+}
+
 
 window.addEventListener('load', ()=>{ setTimeout(loadPrices, 500); });
 
